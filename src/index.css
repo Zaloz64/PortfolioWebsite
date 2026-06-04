@@ -1,10 +1,11 @@
 :root {
-  --bg: #d6e26a;
-  --ink: #1a1f0c;
-  --ink-soft: #2c351a;
-  --cream: #f5f0d6;
-  --cream-soft: #ebe5c4;
-  --accent: #1a1f0c;
+  --bg: #1d2dbf;
+  --ink: #0d1352;
+  --ink-soft: #1c2980;
+  --cream: #ffffff;
+  --cream-soft: #eef0fa;
+  --accent: #0d1352;
+  --squiggle: #8186dd;
 
   --display: 'Anton', 'Archivo Black', system-ui, sans-serif;
   --serif: 'Instrument Serif', 'Playfair Display', Georgia, serif;
@@ -12,7 +13,7 @@
 
   font: 16px/1.5 var(--sans);
   color: var(--ink);
-  background: var(--bg);
+  background: var(--cream);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -26,7 +27,7 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background: var(--bg);
+  background: var(--cream);
   color: var(--ink);
   scroll-behavior: smooth;
 }
