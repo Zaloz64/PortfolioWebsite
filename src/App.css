@@ -422,8 +422,11 @@ section {
 }
 
 /* ---------- Building (bento grid) ---------- */
+/* full-bleed so the dot grid + watermark span the whole window */
 .building {
   position: relative;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
 }
 
 /* the stage: blocks drop in centred, a giant faint word sits behind them */
@@ -432,15 +435,18 @@ section {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  /* full screen so the bento centres vertically (watermark + label anchor it) */
+  /* one-screen stage where it fits; grows naturally on short viewports */
   min-height: 100vh;
-  padding: clamp(80px, 11vh, 112px) 0 clamp(40px, 6vh, 72px);
+  /* horizontal inset re-creates the .page column the full-bleed gave up;
+     top clears the fixed 72px band + its hanging scallop bumps */
+  padding: clamp(124px, 15vh, 160px) max(32px, calc(50vw - 608px))
+    clamp(48px, 7vh, 88px);
   box-sizing: border-box;
   /* clip the parked tiles + the oversized watermark to the section */
   overflow: hidden;
 }
 
-/* blueprint dot grid behind the tiles, fading out toward the edges */
+/* blueprint dot grid covering the entire section */
 .building-stage::before {
   content: '';
   position: absolute;
@@ -448,23 +454,20 @@ section {
   z-index: 0;
   pointer-events: none;
   background-image: radial-gradient(
-    rgba(13, 19, 82, 0.14) 1.2px,
+    rgba(13, 19, 82, 0.13) 1.2px,
     transparent 1.3px
   );
   background-size: 26px 26px;
-  -webkit-mask-image: radial-gradient(
-    ellipse 90% 80% at 50% 50%,
-    black 55%,
-    transparent 100%
-  );
-  mask-image: radial-gradient(
-    ellipse 90% 80% at 50% 50%,
-    black 55%,
-    transparent 100%
-  );
 }
 
-/* huge ghosted word behind the blocks, same faint-display look as the ticker */
+/* standard section heading, same system as journey/about */
+.building-head {
+  position: relative;
+  z-index: 1;
+  margin-bottom: clamp(28px, 4vh, 44px);
+}
+
+/* huge ghosted word behind the blocks — stays put, like journey's watermark */
 .building-watermark {
   position: absolute;
   left: 50%;
@@ -472,41 +475,21 @@ section {
   transform: translate(-50%, -50%);
   z-index: 0;
   font-family: var(--display);
-  font-size: clamp(120px, 27vw, 420px);
+  font-size: clamp(120px, 26vw, 380px);
   line-height: 0.8;
   letter-spacing: 0.01em;
   text-transform: uppercase;
   /* hollow outline instead of a grey fill — print-proof look */
   color: transparent;
-  -webkit-text-stroke: 1.5px rgba(13, 19, 82, 0.18);
+  -webkit-text-stroke: 1.5px rgba(13, 19, 82, 0.14);
   white-space: nowrap;
   pointer-events: none;
   user-select: none;
-  transition: opacity 0.6s ease;
-}
-
-/* fade the watermark out once the bento has dropped/landed into view */
-.building.is-dropped .building-watermark {
-  opacity: 0;
 }
 
 .building-stage .build-bento {
   position: relative;
   z-index: 1;
-}
-
-/* small label tucked into the bottom-left corner */
-.building-label {
-  position: absolute;
-  left: 0;
-  bottom: clamp(28px, 6vh, 64px);
-  z-index: 2;
-  font-family: var(--sans);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--bg);
 }
 
 /* armed = the drop will play; park the tiles above the fold until triggered */
@@ -567,8 +550,8 @@ section {
   grid-template-areas:
     'a b'
     'c b';
-  gap: 16px;
-  min-height: clamp(340px, 44vh, 460px);
+  gap: clamp(16px, 1.4vw, 22px);
+  min-height: clamp(320px, 40vh, 440px);
 }
 
 .bento-a {
@@ -587,7 +570,7 @@ section {
   border: 2px solid var(--ink);
   /* sticker sheet: hard ink offset, no blur */
   box-shadow: 8px 8px 0 var(--ink);
-  padding: clamp(24px, 3vw, 38px);
+  padding: clamp(22px, 2.4vw, 34px);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -642,10 +625,10 @@ section {
 /* oversized icon echo bleeding off the corner */
 .bento-ghost {
   position: absolute;
-  right: -7%;
-  bottom: -24%;
-  width: 56%;
-  opacity: 0.13;
+  right: -10%;
+  bottom: -30%;
+  width: 50%;
+  opacity: 0.1;
   transform: rotate(-12deg);
   pointer-events: none;
   z-index: 0;
@@ -735,20 +718,19 @@ section {
   transform: translateY(-1px);
 }
 
-@media (max-width: 720px) {
+@media (max-width: 860px) {
   .building-stage {
     min-height: 0;
     display: block;
-    padding: 96px 0 64px;
+    padding-top: 96px;
+    padding-bottom: 64px;
   }
   .building-watermark {
     font-size: clamp(72px, 30vw, 200px);
     top: 16%;
   }
-  .building-label {
-    position: static;
-    display: block;
-    margin-top: 28px;
+  .building-head {
+    margin-bottom: 28px;
   }
   .build-bento {
     grid-template-columns: 1fr;

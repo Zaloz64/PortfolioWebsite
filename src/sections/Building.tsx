@@ -59,7 +59,7 @@ function AppIcon({ id }: { id: string }) {
 
 export function BuildingSection() {
   const [flower, focus] = BUILDING_APPS
-  const labelRef = useRef<HTMLSpanElement>(null)
+  const bentoRef = useRef<HTMLDivElement>(null)
   const [armed, setArmed] = useState(false)
   const [dropped, setDropped] = useState(false)
 
@@ -78,13 +78,13 @@ export function BuildingSection() {
     }
   }, [])
 
-  // Scrolling the section's base into view marks it "dropped" once — this both
-  // triggers the tile drop (when armed) and fades out the background watermark.
+  // Scrolling the bento area into view marks the section "dropped" once,
+  // triggering the tile drop (when armed). Watching the bento itself (not a
+  // bottom label) means the drop fires on arrival even on short viewports
+  // where the section is taller than the screen.
   useEffect(() => {
-    const el = labelRef.current
+    const el = bentoRef.current
     if (!el) return
-    // Fire once the bottom of the section (its label) is in view — i.e. the
-    // one-screen stage has framed — so the blocks drop in on arrival.
     const io = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
@@ -92,7 +92,7 @@ export function BuildingSection() {
           io.disconnect()
         }
       },
-      { threshold: 0.6 },
+      { threshold: 0.35 },
     )
     io.observe(el)
     return () => io.disconnect()
@@ -109,7 +109,13 @@ export function BuildingSection() {
         <span className="building-watermark" aria-hidden="true">
           building
         </span>
-        <div className="build-bento">
+        <div className="building-head section-heading">
+          <span className="section-eyebrow">— in the works</span>
+          <h2 className="section-title">
+            building<span className="section-title-dot">.</span>
+          </h2>
+        </div>
+        <div className="build-bento" ref={bentoRef}>
           <article className="bento-tile bento-a">
             <div className="bento-ghost" aria-hidden="true">
               <AppIcon id={flower.id} />
@@ -154,9 +160,6 @@ export function BuildingSection() {
             </div>
           </article>
         </div>
-        <span className="building-label" ref={labelRef}>
-          — building
-        </span>
       </div>
     </section>
   )
