@@ -152,7 +152,9 @@ export function Footer() {
       >
         <div className="footer-grid">
           <div className="footer-intro">
-            <h2 className="footer-headline">Need a hand with something?</h2>
+            <h2 className="footer-headline">
+              Need a hand with <em>something</em>?
+            </h2>
             <p className="footer-sub">
               I do design, code, and the in-between. Drop me a line and
               we'll figure it out.

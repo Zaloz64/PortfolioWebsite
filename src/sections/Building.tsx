@@ -111,6 +111,12 @@ export function BuildingSection() {
         </span>
         <div className="build-bento">
           <article className="bento-tile bento-a">
+            <div className="bento-ghost" aria-hidden="true">
+              <AppIcon id={flower.id} />
+            </div>
+            <span className="bento-index" aria-hidden="true">
+              N°01
+            </span>
             <AppIcon id={flower.id} />
             <div>
               <span className="bento-tag">{flower.tag}</span>
@@ -119,6 +125,12 @@ export function BuildingSection() {
             </div>
           </article>
           <article className="bento-tile bento-b">
+            <div className="bento-ghost" aria-hidden="true">
+              <AppIcon id={focus.id} />
+            </div>
+            <span className="bento-index" aria-hidden="true">
+              N°02
+            </span>
             <AppIcon id={focus.id} />
             <div>
               <span className="bento-tag">{focus.tag}</span>
@@ -127,8 +139,11 @@ export function BuildingSection() {
             </div>
           </article>
           <article className="bento-tile bento-c">
+            <span className="bento-index" aria-hidden="true">
+              ✶
+            </span>
             <div>
-              <span className="bento-tag">— My philosophy</span>
+              <span className="bento-tag">My philosophy</span>
               <h3 className="bento-name">Buy it once. Keep it yours.</h3>
               <p className="bento-note">
                 I’m tired of paying monthly for things that should just be mine.

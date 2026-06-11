@@ -43,9 +43,9 @@ function App() {
       const hot = Math.round(size / 2)
       return `url("data:image/svg+xml,${encodeURIComponent(svg)}") ${hot} ${hot}, auto`
     }
-    const base = flower('#1d2dbf', '#0d1352', 34)
-    const hover = flower('#8186dd', '#1d2dbf', 44)
-    const press = flower('#0d1352', '#8186dd', 30)
+    const base = flower('#2444e8', '#0d1352', 34)
+    const hover = flower('#a9b8ff', '#2444e8', 44)
+    const press = flower('#0d1352', '#a9b8ff', 30)
     const style = document.createElement('style')
     style.textContent =
       `* { cursor: ${base} !important; }` +
@@ -218,6 +218,7 @@ function App() {
           style={vh > 0 ? { height: `${bandHeight}px` } : undefined}
         >
           <ScallopFrame expand={scallopExpand} photoOpacity={photoFade} />
+          <div className="band-grain" aria-hidden="true" />
           <header className="topnav" aria-label="Top navigation">
             <a
               className="topnav-logo"

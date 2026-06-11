@@ -34,7 +34,21 @@ export function Hero({
             I make the things
           </span>
           <span className="hl-display">
-            I wish <span className="hl-blue">exist</span>
+            I wish{' '}
+            <span className="hl-exist">
+              exist
+              <svg
+                className="hl-underline"
+                viewBox="0 0 120 14"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M2 3 a 11.6 11.6 0 0 0 23.2 0 a 11.6 11.6 0 0 0 23.2 0 a 11.6 11.6 0 0 0 23.2 0 a 11.6 11.6 0 0 0 23.2 0 a 11.6 11.6 0 0 0 23.2 0"
+                  pathLength={300}
+                />
+              </svg>
+            </span>
           </span>
         </h1>
         <p className="hero-subtitle">
@@ -48,6 +62,11 @@ export function Hero({
         >
           Just say hi →
         </a>
+      </div>
+
+      <div className="hero-marginalia" aria-hidden="true">
+        <span>Gothenburg, SE — 57.7°N 11.9°E</span>
+        <span>Open for commissions ✶</span>
       </div>
 
       <a

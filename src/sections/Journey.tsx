@@ -448,6 +448,9 @@ export function JourneySection() {
       style={pinned ? { height: trackH } : undefined}
     >
       <div className="journey-inner">
+      <span className="journey-watermark" aria-hidden="true">
+        journey
+      </span>
       <div className="journey-head">
         <div className="section-heading">
           <span className="section-eyebrow">

@@ -1,11 +1,12 @@
 :root {
-  --bg: #1d2dbf;
+  --bg: #2444e8;
   --ink: #0d1352;
   --ink-soft: #1c2980;
   --cream: #ffffff;
   --cream-soft: #eef0fa;
   --accent: #0d1352;
-  --squiggle: #8186dd;
+  --ink-deep: #070b33;
+  --squiggle: #a9b8ff;
 
   --display: 'Anton', 'Archivo Black', system-ui, sans-serif;
   --serif: 'Instrument Serif', 'Playfair Display', Georgia, serif;
@@ -21,6 +22,11 @@
 
 * {
   box-sizing: border-box;
+}
+
+::selection {
+  background: var(--bg);
+  color: var(--cream);
 }
 
 html,
