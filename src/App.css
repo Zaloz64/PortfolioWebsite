@@ -31,6 +31,11 @@ section {
   clip-path: inset(0 0 -120px 0);
 }
 
+/* The mobile menu hangs below the band, so it needs more bottom overflow. */
+.top-band.menu-open {
+  clip-path: inset(0 0 -480px 0);
+}
+
 .top-band-spacer {
   height: calc(100vh - 96px);
   width: 100%;
@@ -331,26 +336,109 @@ section {
 /* ---------- Building (bento grid) ---------- */
 .building {
   position: relative;
-  margin-top: 160px;
-  margin-bottom: 80px;
 }
 
-/* sits in the left gutter, out of flow, so the bento keeps full width */
-.building-side {
-  position: absolute;
-  top: 50%;
-  right: 100%;
-  transform: translateY(-50%) rotate(180deg);
-  margin-right: clamp(8px, 1.5vw, 20px);
-  writing-mode: vertical-rl;
-  font-family: var(--display);
-  font-size: clamp(30px, 3.2vw, 56px);
-  line-height: 0.9;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  color: var(--ink);
-  white-space: nowrap;
+/* the stage: blocks drop in centred, a giant faint word sits behind them */
+.building-stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  /* full screen so the bento centres vertically (watermark + label anchor it) */
+  min-height: 100vh;
+  padding: clamp(80px, 11vh, 112px) 0 clamp(40px, 6vh, 72px);
+  box-sizing: border-box;
+  /* clip the parked tiles + the oversized watermark to the section */
+  overflow: hidden;
 }
+
+/* huge ghosted word behind the blocks, same faint-display look as the ticker */
+.building-watermark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  font-family: var(--display);
+  font-size: clamp(120px, 27vw, 420px);
+  line-height: 0.8;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: rgba(13, 19, 82, 0.06);
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  transition: opacity 0.6s ease;
+}
+
+/* fade the watermark out once the bento has dropped/landed into view */
+.building.is-dropped .building-watermark {
+  opacity: 0;
+}
+
+.building-stage .build-bento {
+  position: relative;
+  z-index: 1;
+}
+
+/* small label tucked into the bottom-left corner */
+.building-label {
+  position: absolute;
+  left: 0;
+  bottom: clamp(28px, 6vh, 64px);
+  z-index: 2;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--bg);
+}
+
+/* armed = the drop will play; park the tiles above the fold until triggered */
+.building--armed .bento-tile {
+  transform: translateY(-115vh);
+  will-change: transform;
+}
+
+/* scrolled into view → each tile falls, the bottom block (c) first */
+.building--armed.is-dropped .bento-c {
+  animation: tileDrop 1.05s linear 0s both;
+}
+.building--armed.is-dropped .bento-b {
+  animation: tileDrop 1.05s linear 0.16s both;
+}
+.building--armed.is-dropped .bento-a {
+  animation: tileDrop 1.05s linear 0.32s both;
+}
+
+/* gravity: accelerate down, land, then a couple of small settling bounces */
+@keyframes tileDrop {
+  0% {
+    transform: translateY(-115vh);
+    animation-timing-function: ease-in;
+  }
+  50% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0.3, 0, 0.2, 1);
+  }
+  68% {
+    transform: translateY(-3.5vh);
+    animation-timing-function: ease-in;
+  }
+  84% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0.3, 0, 0.2, 1);
+  }
+  93% {
+    transform: translateY(-1vh);
+    animation-timing-function: ease-in;
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
 
 .app-icon {
   width: clamp(48px, 6vw, 84px);
@@ -366,7 +454,7 @@ section {
     'a b'
     'c b';
   gap: 16px;
-  min-height: 540px;
+  min-height: clamp(340px, 44vh, 460px);
 }
 
 .bento-a {
@@ -405,6 +493,7 @@ section {
 .bento-c {
   background: var(--cream-soft);
   color: var(--ink);
+  justify-content: center;
 }
 
 .bento-tile .app-icon {
@@ -473,25 +562,20 @@ section {
   transform: translateY(-1px);
 }
 
-/* not enough side gutter — drop the label above the grid instead */
-@media (max-width: 1024px) {
-  .building-side {
-    position: static;
-    writing-mode: horizontal-tb;
-    transform: none;
-    margin: 0 0 26px;
-    font-size: clamp(30px, 5vw, 56px);
-  }
-}
-
 @media (max-width: 720px) {
-  .building {
-    margin-top: 96px;
-    margin-bottom: 48px;
+  .building-stage {
+    min-height: 0;
+    display: block;
+    padding: 96px 0 64px;
   }
-  .building-side {
-    margin-bottom: 20px;
-    font-size: clamp(28px, 8vw, 46px);
+  .building-watermark {
+    font-size: clamp(72px, 30vw, 200px);
+    top: 16%;
+  }
+  .building-label {
+    position: static;
+    display: block;
+    margin-top: 28px;
   }
   .build-bento {
     grid-template-columns: 1fr;
@@ -509,22 +593,40 @@ section {
 .journey {
   position: relative;
   margin: 100px calc(50% - 50vw);
-  min-height: 100vh;
-  padding: 80px 0;
   background: var(--ink);
   color: var(--cream);
+}
+
+.journey-inner {
+  /* fill the viewport so the navy reads as a full-screen band; content is
+     centred. The pinned timeline overrides height below. */
+  min-height: 100vh;
+  padding: 80px 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
-.journey .section-label {
-  margin-bottom: 40px;
-  padding: 0 max(40px, calc(50vw - 640px));
+/* full timeline: pin the inner stage and scrub the rail with page scroll */
+.journey--pinned .journey-inner {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  min-height: 0;
 }
 
-.journey .section-label h2,
-.journey .section-label .num {
+/* pinned: rail clips (NOT a scroll container, so the vertical wheel passes
+   through to the page); the track is moved by translateX from JS */
+.journey--pinned .vtimeline {
+  overflow: clip;
+}
+
+.journey--pinned .vt-track {
+  will-change: transform;
+}
+
+.journey .section-eyebrow,
+.journey .section-title {
   color: var(--cream);
 }
 
@@ -568,6 +670,40 @@ section {
   pointer-events: none;
 }
 
+/* entrance reveal — heading + highlight cards rise in when scrolled into view */
+.journey-head,
+.journey-top3 .top3-card {
+  opacity: 0;
+  transform: translateY(34px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.journey-reveal .journey-head,
+.journey-reveal .journey-top3 .top3-card {
+  opacity: 1;
+  transform: none;
+}
+
+.journey-reveal .journey-top3 .top3-card:nth-child(1) {
+  transition-delay: 0.1s;
+}
+.journey-reveal .journey-top3 .top3-card:nth-child(2) {
+  transition-delay: 0.22s;
+}
+.journey-reveal .journey-top3 .top3-card:nth-child(3) {
+  transition-delay: 0.34s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .journey-head,
+  .journey-top3 .top3-card {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 /* in the full timeline, tuck the heading into the empty left area */
 .journey-head--side {
   position: absolute;
@@ -582,24 +718,6 @@ section {
 .journey-head--side.faded {
   opacity: 0;
   transform: translateY(-50%) translateX(-16px);
-}
-
-.journey-title {
-  font-family: var(--display);
-  font-size: clamp(40px, 6vw, 72px);
-  line-height: 1;
-  letter-spacing: 0.01em;
-  text-transform: uppercase;
-  color: var(--cream);
-}
-
-.journey-lead {
-  margin-top: 10px;
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: clamp(18px, 2vw, 26px);
-  color: var(--cream);
-  opacity: 0.7;
 }
 
 .timeline {
@@ -790,8 +908,9 @@ section {
   min-height: clamp(240px, 26vw, 320px);
   padding: clamp(28px, 3vw, 44px);
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  background: var(--ink-soft);
+  border: 1.5px solid rgba(255, 255, 255, 0.28);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.3);
 }
 
 .top3-bg {
@@ -867,6 +986,49 @@ section {
   opacity: 0.85;
 }
 
+/* Clickable milestones get a subtle lift + a "read more" hint that surfaces
+   on hover/focus. Non-interactive cards are unaffected. */
+.top3-card.is-clickable {
+  transition: transform 0.3s ease, box-shadow 0.3s ease,
+    border-color 0.3s ease;
+}
+
+/* Lift only in the top-3 grid — the pinned timeline cards drive their own
+   scale transform, so a translate here would fight it. */
+.journey-top3 .top3-card.is-clickable:hover,
+.journey-top3 .top3-card.is-clickable:focus-visible {
+  transform: translateY(-4px);
+  box-shadow: 0 22px 44px rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.5);
+  outline: none;
+}
+
+.vt-item .top3-card.is-clickable:focus-visible {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.top3-more {
+  position: relative;
+  z-index: 4;
+  margin-top: 4px;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--squiggle);
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.top3-card.is-clickable:hover .top3-more,
+.top3-card.is-clickable:focus-visible .top3-more {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 @media (max-width: 860px) {
   .journey-top3 {
     grid-template-columns: 1fr;
@@ -876,10 +1038,190 @@ section {
   }
 }
 
+/* ---------- Journey: horizontal timeline (full view) ---------- */
+/* the viewport: full-bleed, fixed height; on mobile it scrolls natively */
+.vtimeline {
+  position: relative;
+  /* fixed height so an expanding card never changes the row's height */
+  height: clamp(360px, 34vw, 420px);
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  margin: 12px calc(50% - 50vw) 0;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* the moving content: a flex row wider than the viewport */
+.vt-track {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  width: max-content;
+  /* side room so the first and last cards can reach the centre */
+  padding: 0 calc(50vw - clamp(210px, 21vw, 270px));
+  /* dotted line that travels with the cards */
+  background-image: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.5) 1.5px,
+    transparent 1.8px
+  );
+  background-size: 12px 4px;
+  background-repeat: repeat-x;
+  background-position: 0 50%;
+}
+
+.vtimeline::-webkit-scrollbar {
+  display: none;
+}
+
+.vt-item {
+  position: relative;
+  /* full width matches the highlight card; the active one shows at this size,
+     the rest scale down — all layout-neutral so the row never reflows */
+  flex: 0 0 clamp(420px, 42vw, 540px);
+  padding: 0 clamp(30px, 3.5vw, 60px);
+  display: flex;
+  align-items: center;
+  scroll-snap-align: center;
+  /* stagger the cards in when the full journey opens (delay set inline) */
+  animation: vtRise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes vtRise {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.vt-item.is-active {
+  z-index: 3;
+}
+
+.vt-item .top3-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 100%;
+  /* collapsed: shorter and scaled down */
+  height: clamp(160px, 17vw, 200px);
+  min-height: 0;
+  margin: 0;
+  justify-content: center;
+  transform-origin: center;
+  transform: scale(0.86);
+  transition: height 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.45s ease, border-color 0.45s ease;
+}
+
+/* active = same size as a highlight card */
+.vt-item.is-active .top3-card {
+  height: clamp(240px, 26vw, 320px);
+  transform: scale(1);
+  border-color: rgba(255, 255, 255, 0.42);
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.45);
+}
+
+/* translucent blue overlay dims non-active cards (crisper than fading) */
+.vt-item .top3-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  background: var(--ink);
+  opacity: 0.55;
+  pointer-events: none;
+  transition: opacity 0.45s ease;
+}
+
+.vt-item.is-active .top3-card::before {
+  opacity: 0;
+}
+
+/* year + body reveal when the card is active, so it reads like a highlight
+   card (year on top, then title, then body); collapsed = title only */
+/* year always shows; only the body reveals on the active card */
+.vt-item .top3-body {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  line-clamp: 5;
+  -webkit-box-orient: vertical;
+  transition: max-height 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.4s ease, margin 0.5s ease;
+}
+
+.vt-item:not(.is-active) .top3-body {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.vt-item.is-active .top3-body {
+  max-height: 200px;
+  opacity: 1;
+  margin-top: auto;
+}
+
+/* flower node on the line, sitting in the gap before each card */
+.vt-node {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.vt-item.is-active .vt-node {
+  transform: translate(-50%, -50%) scale(1.18);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vt-item,
+  .vt-item .top3-card,
+  .vt-node,
+  .vt-details {
+    transition: none;
+  }
+  .vt-item {
+    animation: none;
+  }
+}
+
+.vt-flower {
+  width: 80%;
+  height: auto;
+  transform: rotate(-8deg);
+  filter: drop-shadow(0 3px 8px rgba(13, 19, 82, 0.5));
+}
+
+.vt-flower-petals {
+  fill: var(--squiggle);
+}
+
+.vt-flower-center {
+  fill: var(--cream);
+}
+
 .journey-actions {
   display: flex;
   justify-content: center;
-  margin-top: 36px;
+  margin-top: clamp(48px, 7vh, 88px);
 }
 
 .journey-toggle {
@@ -888,18 +1230,18 @@ section {
   background: transparent;
   color: var(--cream);
   border: none;
-  padding: 15px 34px;
+  padding: 16px 38px;
   font-family: var(--sans);
   font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
+  font-weight: 600;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: color 0.25s ease, transform 0.2s ease;
+  transition: color 0.25s ease, transform 0.25s ease;
 }
 
 .journey-toggle:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 
 /* scalloped (bubbly) outline, like the landing band's edge */
@@ -910,10 +1252,15 @@ section {
   height: 100%;
   overflow: visible;
   pointer-events: none;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.journey-toggle:hover .scallop-btn-border {
+  transform: scale(1.04);
 }
 
 .scallop-btn-border path {
-  fill: none;
+  fill: rgba(255, 255, 255, 0.04);
   stroke: var(--cream);
   stroke-width: 1.5;
   vector-effect: non-scaling-stroke;
@@ -923,6 +1270,24 @@ section {
 .journey-toggle-label {
   position: relative;
   z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.journey-chevron {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.journey-chevron--up {
+  transform: rotate(180deg);
 }
 
 .journey-toggle:hover .scallop-btn-border path {
@@ -933,7 +1298,138 @@ section {
   color: var(--ink);
 }
 
+.journey-toggle:hover .journey-chevron {
+  transform: translateY(2px);
+}
+
+.journey-toggle:hover .journey-chevron--up {
+  transform: rotate(180deg) translateY(2px);
+}
+
 /* Cloud blooms out of the button to cover the screen, then shrinks back */
+/* Milestone detail modal */
+.milestone-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(13, 19, 82, 0.6);
+  backdrop-filter: blur(4px);
+  animation: milestoneFade 0.25s ease both;
+}
+
+.milestone-modal {
+  position: relative;
+  width: min(560px, 100%);
+  max-height: 88vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: clamp(28px, 4vw, 48px);
+  border-radius: 28px;
+  background: var(--ink-soft);
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45);
+  animation: milestonePop 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.milestone-close {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--cream);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.milestone-close:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.milestone-img {
+  width: 100%;
+  height: clamp(160px, 26vh, 240px);
+  object-fit: cover;
+  object-position: center 26%;
+  border-radius: 18px;
+}
+
+.milestone-year {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(20px, 2vw, 28px);
+  color: var(--cream);
+}
+
+.milestone-title {
+  font-family: var(--display);
+  font-size: clamp(30px, 4vw, 48px);
+  line-height: 1;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--squiggle);
+}
+
+.milestone-detail {
+  font-size: clamp(15px, 1.2vw, 17px);
+  line-height: 1.65;
+  color: var(--cream);
+  opacity: 0.9;
+}
+
+.milestone-tags {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0;
+  margin: 4px 0 0;
+}
+
+.milestone-tags li {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  font-family: var(--sans);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--cream);
+}
+
+@keyframes milestoneFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes milestonePop {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 .journey-cloud {
   position: fixed;
   inset: 0;
@@ -1015,19 +1511,50 @@ section {
   align-content: center;
 }
 
+/* entrance reveal — copy + portrait rise in when the section scrolls into view */
+.about .about-text > *,
+.about .about-portrait {
+  opacity: 0;
+  transform: translateY(34px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.about-reveal .about-text > *,
+.about-reveal .about-portrait {
+  opacity: 1;
+  transform: none;
+}
+
+.about-reveal .about-text > *:nth-child(1) {
+  transition-delay: 0.05s;
+}
+.about-reveal .about-text > *:nth-child(2) {
+  transition-delay: 0.16s;
+}
+.about-reveal .about-text > *:nth-child(3) {
+  transition-delay: 0.27s;
+}
+.about-reveal .about-text > *:nth-child(4) {
+  transition-delay: 0.38s;
+}
+.about-reveal .about-portrait {
+  transition-delay: 0.3s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about .about-text > *,
+  .about .about-portrait {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 .about-text {
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
-
-.about-eyebrow {
-  font-family: var(--sans);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--bg);
 }
 
 .about-lead {
@@ -1199,19 +1726,6 @@ section {
     width: 100%;
     justify-self: center;
   }
-}
-
-.about-heading {
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: clamp(40px, 5.5vw, 84px);
-  line-height: 0.9;
-  letter-spacing: -0.02em;
-  color: var(--ink);
-}
-
-.about-heading-dot {
-  color: var(--squiggle);
 }
 
 .about-body {
@@ -1466,29 +1980,35 @@ section {
   }
 }
 
-/* ---------- Section label (shared) ---------- */
-.section-label {
+/* ---------- Section heading (shared across sections) ---------- */
+.section-heading {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  margin-bottom: 32px;
-  border-bottom: 1px solid var(--ink);
-  padding-bottom: 16px;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.section-label h2 {
-  font-family: var(--display);
-  font-size: clamp(40px, 6vw, 72px);
+.section-eyebrow {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  letter-spacing: 0.01em;
-  line-height: 1;
+  color: var(--bg);
 }
 
-.section-label .num {
+.section-title {
+  margin: 0;
   font-family: var(--serif);
   font-style: italic;
-  font-size: 20px;
-  opacity: 0.7;
+  font-size: clamp(40px, 5.5vw, 84px);
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  text-transform: lowercase;
+  color: var(--ink);
+}
+
+.section-title-dot {
+  color: var(--squiggle);
 }
 
 /* ---------- Footer ---------- */
@@ -1519,6 +2039,42 @@ section {
   gap: 56px;
   position: relative;
   overflow: hidden;
+}
+
+/* entrance reveal — contact blocks rise in when the footer scrolls into view */
+.footer .footer-intro,
+.footer .footer-form,
+.footer .footer-bottom {
+  opacity: 0;
+  transform: translateY(34px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.footer-reveal .footer-intro {
+  opacity: 1;
+  transform: none;
+  transition-delay: 0.05s;
+}
+.footer-reveal .footer-form {
+  opacity: 1;
+  transform: none;
+  transition-delay: 0.18s;
+}
+.footer-reveal .footer-bottom {
+  opacity: 1;
+  transform: none;
+  transition-delay: 0.3s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .footer .footer-intro,
+  .footer .footer-form,
+  .footer .footer-bottom {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
 
 .footer-intro {
@@ -1673,6 +2229,20 @@ section {
   transform: translateY(-1px);
 }
 
+.footer-form-note {
+  margin-top: 14px;
+  font-family: var(--sans);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--cream);
+  opacity: 0.85;
+}
+
+.footer-form-note a {
+  color: var(--cream);
+  text-decoration: underline;
+}
+
 .footer-bottom {
   display: flex;
   justify-content: space-between;
@@ -1690,13 +2260,25 @@ section {
 }
 
 @media (max-width: 720px) {
+  /* Kept tight so the whole footer (headline included) fits below the fixed
+     72px nav band when the page rests at max scroll — taller spacing leaves
+     the headline clipped behind the band on phones. */
   .footer {
-    padding: 56px 24px 28px;
-    gap: 40px;
+    padding: 48px 24px 20px;
+    gap: 28px;
+  }
+  .footer-headline {
+    font-size: 34px;
+  }
+  .footer-intro {
+    gap: 14px;
+  }
+  .footer-form {
+    gap: 12px;
   }
   .footer-grid {
     grid-template-columns: 1fr;
-    gap: 40px;
+    gap: 28px;
   }
   .footer-bottom {
     flex-direction: column;
@@ -1789,6 +2371,10 @@ section {
   opacity: 1;
 }
 
+.topnav-burger {
+  display: none;
+}
+
 @media (max-width: 720px) {
   .topnav {
     padding: 20px 24px;
@@ -1802,63 +2388,59 @@ section {
   .top-band.compact .topnav-logo {
     font-size: 14px;
   }
+
+  /* Links collapse into a dropdown panel toggled by the burger. */
+  .topnav-burger {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
+    gap: 5px;
+    width: 40px;
+    height: 40px;
+    padding: 10px;
+    background: transparent;
+    border: none;
+    color: inherit;
+  }
+  .topnav-burger span {
+    height: 2px;
+    background: currentColor;
+    border-radius: 2px;
+    transition: transform 0.25s ease, opacity 0.2s ease;
+  }
+  .topnav-burger[aria-expanded='true'] span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+  .topnav-burger[aria-expanded='true'] span:nth-child(2) {
+    opacity: 0;
+  }
+  .topnav-burger[aria-expanded='true'] span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  .topnav-links {
+    display: none;
+    position: absolute;
+    top: calc(100% + 18px);
+    left: 16px;
+    right: 16px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    padding: 10px;
+    background: var(--ink);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 18px;
+    box-shadow: 0 18px 44px rgba(13, 19, 82, 0.45);
+  }
+  .topnav-links.is-open {
+    display: flex;
+  }
   .topnav-links a {
-    padding: 6px 12px;
-    font-size: 13px;
+    padding: 12px;
+    font-size: 15px;
+    text-align: center;
   }
 }
 
-/* ---------- Click ripple (water-drop effect) ---------- */
-.ripple {
-  position: absolute;
-  width: 0;
-  height: 0;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  border: 1.2px solid var(--squiggle);
-  opacity: 0;
-  pointer-events: none;
-  z-index: 5;
-  animation: ripple-expand 3.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.ripple::before,
-.ripple::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  border: 1px solid var(--squiggle);
-  opacity: 0;
-  animation: ripple-expand 3.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.ripple::before {
-  animation-delay: 0.5s;
-}
-
-.ripple::after {
-  animation-delay: 1s;
-}
-
-@keyframes ripple-expand {
-  0% {
-    width: 0;
-    height: 0;
-    opacity: 0;
-    border-width: 1.2px;
-  }
-  18% {
-    opacity: 0.45;
-  }
-  100% {
-    width: 320px;
-    height: 320px;
-    opacity: 0;
-    border-width: 0.3px;
-  }
-}

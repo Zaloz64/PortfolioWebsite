@@ -34,7 +34,9 @@ body {
 
 body {
   min-height: 100vh;
-  overflow-x: hidden;
+  /* clip (not hidden) so body stays a non-scroll-container — `overflow-x:
+     hidden` would force overflow-y to auto and break position: sticky. */
+  overflow-x: clip;
 }
 
 #root {
