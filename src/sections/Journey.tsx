@@ -278,6 +278,7 @@ export function JourneySection() {
   const [openId, setOpenId] = useState<string | null>(null)
   const pinned = showAll && trackH > 0
   const collapsingRef = useRef(false)
+  const expandingRef = useRef(false)
   const openItem = openId ? JOURNEY.find((j) => j.id === openId) ?? null : null
 
   const items = showAll
@@ -292,15 +293,23 @@ export function JourneySection() {
 
   // Collapsing the timeline shrinks the section by several screens, which would
   // otherwise leave you stranded down by the footer. Re-centre on the journey
-  // once the (now short) layout has committed.
+  // once the (now short) layout has committed. Expanding instead jumps to the
+  // section top so the scrub starts at the first milestone, not partway in.
   useLayoutEffect(() => {
-    if (!collapsingRef.current) return
-    collapsingRef.current = false
     const section = sectionRef.current
     if (!section) return
-    const docTop = section.getBoundingClientRect().top + window.scrollY
-    const target = docTop + section.offsetHeight / 2 - window.innerHeight / 2
-    window.scrollTo({ top: Math.max(0, target) })
+    if (collapsingRef.current) {
+      collapsingRef.current = false
+      const docTop = section.getBoundingClientRect().top + window.scrollY
+      const target = docTop + section.offsetHeight / 2 - window.innerHeight / 2
+      window.scrollTo({ top: Math.max(0, target) })
+      return
+    }
+    if (expandingRef.current) {
+      expandingRef.current = false
+      const docTop = section.getBoundingClientRect().top + window.scrollY
+      window.scrollTo({ top: docTop })
+    }
   }, [showAll, sectionRef])
 
   // Native horizontal scroll (mobile / before pinning): track which card is
@@ -424,6 +433,7 @@ export function JourneySection() {
     }
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (reduce) {
+      expandingRef.current = true
       reset(true)
       return
     }
@@ -434,7 +444,10 @@ export function JourneySection() {
       y: rect ? rect.top + rect.height / 2 : window.innerHeight / 2,
     })
     setCloud(true)
-    window.setTimeout(() => reset(true), 520)
+    window.setTimeout(() => {
+      expandingRef.current = true
+      reset(true)
+    }, 520)
     window.setTimeout(() => setCloud(false), 1120)
   }
 
