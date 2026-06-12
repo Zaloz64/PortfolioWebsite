@@ -44,10 +44,7 @@ export function About() {
       id="about"
     >
       <div className="about-text">
-        <span className="section-eyebrow">— a little about me</span>
-        <h2 className="section-title">
-          about<span className="section-title-dot">.</span>
-        </h2>
+        <span className="section-eyebrow">a little about me</span>
         <p className="about-lead">
           I’ve always been drawn to both math and art, but they felt like
           separate worlds until I found{' '}

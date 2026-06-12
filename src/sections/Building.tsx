@@ -110,10 +110,7 @@ export function BuildingSection() {
           building
         </span>
         <div className="building-head section-heading">
-          <span className="section-eyebrow">— in the works</span>
-          <h2 className="section-title">
-            building<span className="section-title-dot">.</span>
-          </h2>
+          <span className="section-eyebrow">in the works</span>
         </div>
         <div className="build-bento" ref={bentoRef}>
           <article className="bento-tile bento-a">
