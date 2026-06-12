@@ -482,7 +482,7 @@ section {
 .building-head {
   position: relative;
   z-index: 1;
-  margin-bottom: clamp(28px, 4vh, 44px);
+  margin-bottom: 22px;
 }
 
 /* huge ghosted word behind the blocks — stays put, like journey's watermark */
@@ -610,6 +610,10 @@ section {
 .bento-b {
   background: var(--ink);
   color: var(--cream);
+  /* tall tile: cluster icon + copy in the middle instead of pinning the
+     copy to the bottom with a dead void above it */
+  justify-content: center;
+  gap: clamp(20px, 3vh, 36px);
 }
 .bento-c {
   background: var(--cream);
@@ -1148,6 +1152,15 @@ section {
   filter: grayscale(0);
   opacity: 0.75;
   transform: scale(1.05);
+}
+
+/* no hover on touch screens — the photos would stay grey and dim forever,
+   so show them in colour by default there */
+@media (hover: none) {
+  .top3-bg {
+    filter: none;
+    opacity: 0.6;
+  }
 }
 
 .top3-card.has-img::after {
@@ -2041,6 +2054,25 @@ section {
   overflow: hidden;
 }
 
+@media (max-width: 720px) {
+  /* the wrapped chip rows are taller than the fixed band — let the skills
+     define the height instead of overflowing into the portrait above */
+  .ticker-zone {
+    height: auto;
+    min-height: 140px;
+  }
+  .about-skills {
+    position: relative;
+    inset: auto;
+    flex-direction: column;
+    gap: 16px;
+    padding: 30px 18px 26px;
+  }
+  .skill-tags {
+    justify-content: center;
+  }
+}
+
 .ticker {
   position: absolute;
   inset: 0;
@@ -2261,11 +2293,12 @@ section {
   gap: 12px;
 }
 
+/* the eyebrow is the section's only label now — give it real presence */
 .section-eyebrow {
   font-family: var(--sans);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.16em;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--bg);
 }
