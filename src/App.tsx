@@ -7,6 +7,7 @@ import { ScallopFrame } from './components/ScallopFrame'
 import { Hero } from './sections/Hero'
 import { BuildingSection } from './sections/Building'
 import { JourneySection } from './sections/Journey'
+import { WorkSection } from './sections/Work'
 import { About } from './sections/About'
 import { Footer } from './sections/Footer'
 
@@ -273,6 +274,8 @@ function App() {
         <BuildingSection />
 
         <JourneySection />
+
+        <WorkSection />
 
         <About />
 

@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { CLOUD_D, FLOWER_D, scallopOutline } from '../lib/svg'
 import { useInView } from '../hooks'
+import { WorkModal } from '../components/WorkModal'
 import cesaImg from '../assets/cesa.jpg'
 import teethImg from '../assets/teeth.jpg'
 import lexImg from '../assets/lexenergy.jpg'
@@ -206,65 +207,8 @@ function MilestoneCard({
   )
 }
 
-// Click-through detail view for a milestone. Portalled over the page with a
-// dimmed backdrop; closes on backdrop click, the close button, or Escape.
-function MilestoneModal({
-  item,
-  onClose,
-}: {
-  item: Milestone
-  onClose: () => void
-}) {
-  const closeRef = useRef<HTMLButtonElement>(null)
-  const img = JOURNEY_IMAGES[item.id]
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', onKey)
-    const prevOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    closeRef.current?.focus()
-    return () => {
-      document.removeEventListener('keydown', onKey)
-      document.body.style.overflow = prevOverflow
-    }
-  }, [onClose])
-
-  return createPortal(
-    <div className="milestone-overlay" onClick={onClose}>
-      <div
-        className="milestone-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-label={item.title}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button
-          ref={closeRef}
-          className="milestone-close"
-          onClick={onClose}
-          aria-label="Close"
-        >
-          ×
-        </button>
-        {img && <img className="milestone-img" src={img} alt="" />}
-        <span className="milestone-year">{item.year}</span>
-        <h3 className="milestone-title">{item.title}</h3>
-        <p className="milestone-detail">{item.detail ?? item.body}</p>
-        {item.tags && (
-          <ul className="milestone-tags">
-            {item.tags.map((t) => (
-              <li key={t}>{t}</li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </div>,
-    document.body,
-  )
-}
+// The click-through detail view is the shared WorkModal (see
+// components/WorkModal.tsx), fed from this file's milestone data.
 
 export function JourneySection() {
   const [showAll, setShowAll] = useState(false)
@@ -512,7 +456,14 @@ export function JourneySection() {
       </div>
 
       {openItem && (
-        <MilestoneModal item={openItem} onClose={() => setOpenId(null)} />
+        <WorkModal
+          year={openItem.year}
+          title={openItem.title}
+          body={openItem.detail ?? openItem.body}
+          tags={openItem.tags}
+          img={JOURNEY_IMAGES[openItem.id]}
+          onClose={() => setOpenId(null)}
+        />
       )}
 
       {cloud &&
