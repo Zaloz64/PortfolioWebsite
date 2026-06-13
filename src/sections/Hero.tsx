@@ -33,28 +33,11 @@ export function Hero({
             <FlowerSticker />
             I make the things
           </span>
-          <span className="hl-display">
-            I wish{' '}
-            <span className="hl-exist">
-              exist
-              <svg
-                className="hl-underline"
-                viewBox="0 0 120 14"
-                preserveAspectRatio="none"
-                aria-hidden="true"
-              >
-                <path
-                  d="M2 3 a 11.6 11.6 0 0 0 23.2 0 a 11.6 11.6 0 0 0 23.2 0 a 11.6 11.6 0 0 0 23.2 0 a 11.6 11.6 0 0 0 23.2 0 a 11.6 11.6 0 0 0 23.2 0"
-                  pathLength={300}
-                />
-              </svg>
-            </span>
-          </span>
+          <span className="hl-display">I wish exist</span>
         </h1>
         <p className="hero-subtitle">
-          Developer &amp; designer in Gothenburg, turning ideas
-          into real things. Got something you want built?
-        </p>
+          Developer &amp; designer in Gothenburg. Got something you want built?
+        </p> 
         <a
           className="hero-cta"
           href="#contact"

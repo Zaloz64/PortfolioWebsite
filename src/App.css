@@ -164,53 +164,13 @@ section {
 
 .hl-display {
   font-family: var(--display);
-  font-size: clamp(58px, 11.5vw, 172px);
-  line-height: 0.88;
+  /* scaled ~1.33x over .hl-serif (same vw breakpoints) so this line ends up
+     the same *width* as "I make the things" above, not the same font size */
+  font-size: clamp(59px, 10vw, 144px);
+  line-height: 0.9;
   letter-spacing: -0.01em;
   text-transform: uppercase;
-  margin-top: 10px;
-}
-
-/* "exist" breaks the Anton wall: lowercase serif italic in the glow blue,
-   with a hand-drawn scallop underline that draws itself in. */
-.hl-exist {
-  position: relative;
-  display: inline-block;
-  font-family: var(--serif);
-  font-style: italic;
-  font-weight: 400;
-  text-transform: lowercase;
-  font-size: 1.06em;
-  line-height: 0;
-  color: var(--squiggle);
-  text-shadow: 0 0 28px rgba(13, 19, 82, 0.85), 0 3px 10px rgba(13, 19, 82, 0.6);
-}
-
-.hl-underline {
-  position: absolute;
-  left: 0.04em;
-  right: 0.1em;
-  bottom: -0.16em;
-  width: calc(100% - 0.14em);
-  height: 0.14em;
-  overflow: visible;
-}
-
-.hl-underline path {
-  fill: none;
-  stroke: var(--squiggle);
-  stroke-width: 5;
-  stroke-linecap: round;
-  vector-effect: non-scaling-stroke;
-  stroke-dasharray: 300;
-  stroke-dashoffset: 300;
-  animation: underlineDraw 0.9s cubic-bezier(0.22, 1, 0.36, 1) 1.15s forwards;
-}
-
-@keyframes underlineDraw {
-  to {
-    stroke-dashoffset: 0;
-  }
+  margin-top: 6px;
 }
 
 .hero-subtitle {
@@ -230,28 +190,26 @@ section {
   margin-top: 36px;
   background: var(--cream);
   color: var(--ink);
-  border: 2px solid var(--ink);
   border-radius: 999px;
-  padding: 15px 32px;
+  padding: 16px 34px;
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  /* sticker: hard ink offset shadow; `translate` (not transform) so it
-     composes with the entry animation's transform */
-  box-shadow: 5px 5px 0 var(--ink);
-  transition: translate 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  /* clean pill with a soft lift off the photo (no hard sticker shadow here) */
+  box-shadow: 0 12px 30px rgba(7, 11, 51, 0.28);
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .hero-cta:hover {
-  background: var(--squiggle);
-  translate: -2px -2px;
-  box-shadow: 8px 8px 0 var(--ink);
+  background: var(--cream-soft);
+  transform: translateY(-2px);
+  box-shadow: 0 16px 36px rgba(7, 11, 51, 0.34);
 }
 
 .hero-cta:active {
-  translate: 3px 3px;
-  box-shadow: 1px 1px 0 var(--ink);
+  transform: translateY(0);
+  box-shadow: 0 8px 20px rgba(7, 11, 51, 0.3);
 }
 
 /* ---------- Hero on-load animation ---------- */
@@ -324,7 +282,7 @@ section {
 /* Scroll cue at the bottom of the landing band */
 .hero-scrolldown {
   position: absolute;
-  bottom: clamp(24px, 5vh, 56px);
+  bottom: clamp(44px, 7vh, 82px);
   left: 50%;
   transform: translateX(-50%);
   display: inline-flex;
@@ -365,12 +323,13 @@ section {
   }
 }
 
-/* tiny print-style labels in the band's bottom corners */
+/* tiny print-style labels in the band's bottom corners — kept well inside
+   the scalloped edge so they don't crowd the border */
 .hero-marginalia {
   position: absolute;
-  left: max(40px, calc(50vw - 640px));
-  right: max(40px, calc(50vw - 640px));
-  bottom: clamp(24px, 5vh, 56px);
+  left: max(64px, calc(50vw - 600px));
+  right: max(64px, calc(50vw - 600px));
+  bottom: clamp(44px, 7vh, 82px);
   display: flex;
   justify-content: space-between;
   pointer-events: none;
@@ -421,10 +380,6 @@ section {
   .topnav-right,
   .scallop-border image {
     animation: none;
-  }
-  .hl-underline path {
-    animation: none;
-    stroke-dashoffset: 0;
   }
 }
 
