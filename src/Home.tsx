@@ -189,7 +189,12 @@ export function Home({ onNavigateWork }: { onNavigateWork: () => void }) {
         className={`top-band ${compact ? 'compact' : 'expanded'}${menuOpen ? ' menu-open' : ''}`}
         style={vh > 0 ? { height: `${bandHeight}px` } : undefined}
       >
-        <ScallopFrame expand={scallopExpand} photoOpacity={photoFade} />
+        {/* once compact, kill the photo entirely so the collapsed nav is a
+            clean, flat navy matching the other sections (no blue-tinted seam) */}
+        <ScallopFrame
+          expand={scallopExpand}
+          photoOpacity={compact ? 0 : photoFade}
+        />
         <div className="band-grain" aria-hidden="true" />
         <header className="topnav" aria-label="Top navigation">
           <a

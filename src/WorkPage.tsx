@@ -51,9 +51,7 @@ export function WorkPage({ onBack }: { onBack: () => void }) {
             Back
           </button>
           <span className="section-eyebrow">the full archive</span>
-          <h1 className="workpage-title">
-            everything I’ve <em>made</em>
-          </h1>
+          <h1 className="workpage-title">everything I’ve made</h1>
           <p className="workpage-lead">
             Apps, code, design, ventures and the things in between — filter by
             what you’re curious about.

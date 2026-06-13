@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import './App.css'
 import { FLOWER_D } from './lib/svg'
 import { Home } from './Home'
@@ -11,6 +11,16 @@ const routeFromPath = (): Route =>
 
 function App() {
   const [route, setRoute] = useState<Route>(routeFromPath)
+  // Where the landing page was scrolled when we left for /work, so Back
+  // returns you to the same spot rather than the top.
+  const homeScroll = useRef(0)
+
+  // We restore scroll ourselves on route changes; stop the browser fighting us.
+  useEffect(() => {
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual'
+    }
+  }, [])
 
   // Back/forward buttons sync the rendered page with the URL.
   useEffect(() => {
@@ -19,14 +29,28 @@ function App() {
     return () => window.removeEventListener('popstate', onPop)
   }, [])
 
-  const navigate = useCallback((to: Route) => {
-    const path = to === 'work' ? '/work' : '/'
-    if (window.location.pathname !== path) {
-      window.history.pushState({}, '', path)
-    }
-    setRoute(to)
-    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
-  }, [])
+  // After landing back on Home, jump to the saved scroll position; Work
+  // always opens at the top.
+  useLayoutEffect(() => {
+    const y = route === 'home' ? homeScroll.current : 0
+    requestAnimationFrame(() =>
+      window.scrollTo({ top: y, behavior: 'instant' as ScrollBehavior }),
+    )
+  }, [route])
+
+  const navigate = useCallback(
+    (to: Route) => {
+      if (to === 'work' && route !== 'work') {
+        homeScroll.current = window.scrollY
+      }
+      const path = to === 'work' ? '/work' : '/'
+      if (window.location.pathname !== path) {
+        window.history.pushState({}, '', path)
+      }
+      setRoute(to)
+    },
+    [route],
+  )
 
   const goWork = useCallback(() => navigate('work'), [navigate])
   const goHome = useCallback(() => navigate('home'), [navigate])
