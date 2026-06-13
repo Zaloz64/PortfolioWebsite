@@ -1,8 +1,7 @@
-import { useState } from 'react'
-import { FLOWER_D } from '../lib/svg'
-import { useInView } from '../hooks'
-import { WORK, WORK_CATEGORIES, type WorkCategory } from '../lib/work'
-import { WorkModal } from '../components/WorkModal'
+import { useEffect, useState } from 'react'
+import { FLOWER_D } from './lib/svg'
+import { WORK, WORK_CATEGORIES, type WorkCategory } from './lib/work'
+import { WorkModal } from './components/WorkModal'
 
 function TileIcon({ icon }: { icon: 'flower' | 'rings' }) {
   if (icon === 'rings') {
@@ -21,27 +20,44 @@ function TileIcon({ icon }: { icon: 'flower' | 'rings' }) {
   )
 }
 
-export function WorkSection() {
-  const [sectionRef, inView] = useInView<HTMLElement>()
+// The full "everything I've made" view as its own page (route: /work),
+// reached from the Building section. Self-contained: header with a back
+// link, filter chips, the bento grid and the shared detail modal.
+export function WorkPage({ onBack }: { onBack: () => void }) {
   const [filter, setFilter] = useState<WorkCategory | 'all'>('all')
   const [openId, setOpenId] = useState<string | null>(null)
+
+  // play the entrance once on mount
+  const [ready, setReady] = useState(false)
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setReady(true))
+    return () => cancelAnimationFrame(id)
+  }, [])
 
   const items =
     filter === 'all' ? WORK : WORK.filter((w) => w.categories.includes(filter))
   const open = openId ? WORK.find((w) => w.id === openId) ?? null : null
-  // stable plate numbers, independent of the active filter
   const plate = (id: string) =>
     `N°${String(WORK.findIndex((w) => w.id === id) + 1).padStart(2, '0')}`
 
   return (
-    <section
-      ref={sectionRef}
-      className={`work ${inView ? 'work-reveal' : ''}`}
-      id="work"
-    >
-      <div className="work-inner">
-        <div className="work-head">
-          <span className="section-eyebrow">everything I’ve made</span>
+    <main className={`workpage${ready ? ' work-reveal' : ''}`}>
+      <div className="workpage-inner">
+        <header className="workpage-head">
+          <button className="workpage-back" onClick={onBack}>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M15 5l-7 7 7 7" />
+            </svg>
+            Back
+          </button>
+          <span className="section-eyebrow">the full archive</span>
+          <h1 className="workpage-title">
+            everything I’ve <em>made</em>
+          </h1>
+          <p className="workpage-lead">
+            Apps, code, design, ventures and the things in between — filter by
+            what you’re curious about.
+          </p>
           <div
             className="work-filters"
             role="group"
@@ -63,7 +79,7 @@ export function WorkSection() {
               </button>
             ))}
           </div>
-        </div>
+        </header>
 
         {/* key remounts the grid per filter so the stagger replays */}
         <div className="work-grid" key={filter}>
@@ -128,6 +144,6 @@ export function WorkSection() {
           onClose={() => setOpenId(null)}
         />
       )}
-    </section>
+    </main>
   )
 }

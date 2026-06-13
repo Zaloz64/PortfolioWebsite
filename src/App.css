@@ -483,6 +483,48 @@ section {
   position: relative;
   z-index: 1;
   margin-bottom: 22px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px 24px;
+}
+
+/* entry point into the full work archive page */
+.building-archive-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  background: transparent;
+  border: none;
+  padding: 4px 0;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bg);
+  transition: gap 0.2s ease, color 0.2s ease;
+}
+
+.building-archive-link svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.2s ease;
+}
+
+.building-archive-link:hover {
+  gap: 13px;
+  color: var(--ink);
+}
+
+.building-archive-link:hover svg {
+  transform: translateX(2px);
 }
 
 /* huge ghosted word behind the blocks — stays put, like journey's watermark */
@@ -1846,17 +1888,17 @@ section {
   }
 }
 
-/* ---------- Work (filterable bento grid) ---------- */
-/* full-bleed white band with the blueprint dot grid, like Building */
-.work {
+/* ---------- Work archive page (filterable bento grid) ---------- */
+/* its own full page (route /work) on the white + blueprint-dot ground */
+.workpage {
   position: relative;
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
+  min-height: 100vh;
+  background: var(--cream);
 }
 
-.work::before {
+.workpage::before {
   content: '';
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
@@ -1867,19 +1909,99 @@ section {
   background-size: 26px 26px;
 }
 
-.work-inner {
+.workpage-inner {
   position: relative;
   z-index: 1;
-  padding: clamp(72px, 10vh, 110px) max(32px, calc(50vw - 608px));
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: clamp(40px, 6vh, 72px) max(24px, calc(50vw - 608px))
+    clamp(64px, 10vh, 120px);
 }
 
-.work-head {
+.workpage-head {
+  margin-bottom: clamp(32px, 5vh, 52px);
+}
+
+/* eyebrow owns its own line under the back link */
+.workpage-head .section-eyebrow {
+  display: block;
+}
+
+/* back link sits above the title like a breadcrumb */
+.workpage-back {
   display: flex;
+  width: fit-content;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 18px;
+  gap: 8px;
   margin-bottom: 26px;
+  padding: 9px 18px 9px 14px;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: var(--cream);
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+  transition: translate 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.workpage-back svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.2s ease;
+}
+
+.workpage-back:hover {
+  background: var(--squiggle);
+  translate: -2px -2px;
+  box-shadow: 6px 6px 0 var(--ink);
+}
+
+.workpage-back:hover svg {
+  transform: translateX(-2px);
+}
+
+.workpage-back:active {
+  translate: 2px 2px;
+  box-shadow: 1px 1px 0 var(--ink);
+}
+
+.workpage-title {
+  margin: 12px 0 0;
+  font-family: var(--display);
+  font-size: clamp(44px, 7vw, 104px);
+  line-height: 0.92;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+/* accent word breaks the Anton wall, same move as the hero/footer */
+.workpage-title em {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  text-transform: lowercase;
+  font-size: 1.04em;
+  color: var(--bg);
+}
+
+.workpage-lead {
+  margin: 18px 0 28px;
+  max-width: 52ch;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(17px, 1.6vw, 22px);
+  line-height: 1.5;
+  color: rgba(13, 19, 82, 0.7);
 }
 
 .work-filters {
@@ -2148,10 +2270,6 @@ section {
   .work-tile:hover {
     translate: none;
     box-shadow: 5px 5px 0 var(--ink);
-  }
-  .work-head {
-    flex-direction: column;
-    align-items: flex-start;
   }
 }
 

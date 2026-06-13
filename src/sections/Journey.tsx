@@ -411,7 +411,9 @@ export function JourneySection() {
       <div className="journey-head">
         <div className="section-heading">
           <span className="section-eyebrow">
-            {showAll ? 'The journey started with…' : 'A few highlights'}
+            {showAll
+              ? 'My journey — where it started'
+              : 'My journey — a few highlights'}
           </span>
         </div>
       </div>

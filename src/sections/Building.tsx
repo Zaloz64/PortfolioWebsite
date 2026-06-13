@@ -57,7 +57,7 @@ function AppIcon({ id }: { id: string }) {
   )
 }
 
-export function BuildingSection() {
+export function BuildingSection({ onSeeWork }: { onSeeWork: () => void }) {
   const [flower, focus] = BUILDING_APPS
   const bentoRef = useRef<HTMLDivElement>(null)
   const [armed, setArmed] = useState(false)
@@ -111,6 +111,16 @@ export function BuildingSection() {
         </span>
         <div className="building-head section-heading">
           <span className="section-eyebrow">in the works</span>
+          <button
+            className="building-archive-link"
+            onClick={onSeeWork}
+            aria-label="See everything I've made"
+          >
+            Everything I’ve made
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 12h14M13 5l7 7-7 7" />
+            </svg>
+          </button>
         </div>
         <div className="build-bento" ref={bentoRef}>
           <article className="bento-tile bento-a">
