@@ -1,10 +1,12 @@
 :root {
-  --bg: #d6e26a;
-  --ink: #1a1f0c;
-  --ink-soft: #2c351a;
-  --cream: #f5f0d6;
-  --cream-soft: #ebe5c4;
-  --accent: #1a1f0c;
+  --bg: #2444e8;
+  --ink: #0d1352;
+  --ink-soft: #1c2980;
+  --cream: #ffffff;
+  --cream-soft: #eef0fa;
+  --accent: #0d1352;
+  --ink-deep: #070b33;
+  --squiggle: #a9b8ff;
 
   --display: 'Anton', 'Archivo Black', system-ui, sans-serif;
   --serif: 'Instrument Serif', 'Playfair Display', Georgia, serif;
@@ -12,7 +14,7 @@
 
   font: 16px/1.5 var(--sans);
   color: var(--ink);
-  background: var(--bg);
+  background: var(--cream);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -22,18 +24,25 @@
   box-sizing: border-box;
 }
 
+::selection {
+  background: var(--bg);
+  color: var(--cream);
+}
+
 html,
 body {
   margin: 0;
   padding: 0;
-  background: var(--bg);
+  background: var(--cream);
   color: var(--ink);
   scroll-behavior: smooth;
 }
 
 body {
   min-height: 100vh;
-  overflow-x: hidden;
+  /* clip (not hidden) so body stays a non-scroll-container — `overflow-x:
+     hidden` would force overflow-y to auto and break position: sticky. */
+  overflow-x: clip;
 }
 
 #root {

@@ -1,258 +1,133 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import './App.css'
+import { FLOWER_D } from './lib/svg'
+import { Home } from './Home'
+import { WorkPage } from './WorkPage'
 
-const NAV_ITEMS = [
-  { id: 'about', label: 'about' },
-  { id: 'works', label: 'works' },
-  { id: 'gallery', label: 'gallery' },
-  { id: 'contact', label: 'contact' },
-] as const
+type Route = 'home' | 'work'
 
-type SectionId = (typeof NAV_ITEMS)[number]['id']
-
-function useActiveSection(ids: readonly SectionId[]): SectionId | null {
-  const [active, setActive] = useState<SectionId | null>(null)
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
-        if (visible) setActive(visible.target.id as SectionId)
-      },
-      { rootMargin: '-30% 0px -50% 0px', threshold: [0, 0.25, 0.5, 0.75, 1] },
-    )
-
-    ids.forEach((id) => {
-      const el = document.getElementById(id)
-      if (el) observer.observe(el)
-    })
-
-    return () => observer.disconnect()
-  }, [ids])
-
-  return active
-}
+const routeFromPath = (): Route =>
+  window.location.pathname.includes('/work') ? 'work' : 'home'
 
 function App() {
-  const active = useActiveSection(NAV_ITEMS.map((n) => n.id))
-  const [dockHidden, setDockHidden] = useState(true)
-  const lastY = useRef(0)
+  const [route, setRoute] = useState<Route>(routeFromPath)
+  // Where the landing page was scrolled when we left for /work, so Back
+  // returns you to the same spot rather than the top.
+  const homeScroll = useRef(0)
+  // A section to scroll to after we land back on Home (set when a nav link is
+  // clicked from /work). Overrides the saved scroll for that one transition.
+  const pendingSection = useRef<string | null>(null)
 
+  // We restore scroll ourselves on route changes; stop the browser fighting us.
   useEffect(() => {
-    const onScroll = () => {
-      const y = window.scrollY
-      setDockHidden(y < 80)
-      lastY.current = y
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual'
     }
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  const handleNav = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
-    e.preventDefault()
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
+  // Back/forward buttons sync the rendered page with the URL.
+  useEffect(() => {
+    const onPop = () => setRoute(routeFromPath())
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
+
+  // After landing back on Home, jump to the saved scroll position; Work
+  // always opens at the top.
+  useLayoutEffect(() => {
+    // A nav link from /work asked for a specific section: jump there instead
+    // of the saved scroll position.
+    if (route === 'home' && pendingSection.current) {
+      const id = pendingSection.current
+      pendingSection.current = null
+      requestAnimationFrame(() => {
+        if (id === 'home') {
+          window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
+        } else {
+          document
+            .getElementById(id)
+            ?.scrollIntoView({ behavior: 'instant' as ScrollBehavior, block: 'start' })
+        }
+      })
+      return
+    }
+    const y = route === 'home' ? homeScroll.current : 0
+    requestAnimationFrame(() =>
+      window.scrollTo({ top: y, behavior: 'instant' as ScrollBehavior }),
+    )
+  }, [route])
+
+  const navigate = useCallback(
+    (to: Route) => {
+      if (to === 'work' && route !== 'work') {
+        homeScroll.current = window.scrollY
+      }
+      const path = to === 'work' ? '/work' : '/'
+      if (window.location.pathname !== path) {
+        window.history.pushState({}, '', path)
+      }
+      setRoute(to)
+    },
+    [route],
+  )
+
+  const goWork = useCallback(() => navigate('work'), [navigate])
+  const goHome = useCallback(() => navigate('home'), [navigate])
+  // From /work: return to Home and scroll to a given section.
+  const goHomeSection = useCallback(
+    (id: string) => {
+      pendingSection.current = id
+      navigate('home')
+    },
+    [navigate],
+  )
+
+  // Flower-shaped cursor site-wide: blooms bigger on clickable things and
+  // changes colour while pressed. Text fields keep a caret. Site-wide so it
+  // persists across both routes.
+  useEffect(() => {
+    const flower = (petals: string, center: string, size: number) => {
+      const svg =
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 100 100">` +
+        `<path d="${FLOWER_D}" fill="${petals}"/>` +
+        `<circle cx="50" cy="50" r="14" fill="${center}"/></svg>`
+      const hot = Math.round(size / 2)
+      return `url("data:image/svg+xml,${encodeURIComponent(svg)}") ${hot} ${hot}, auto`
+    }
+    const base = flower('#2444e8', '#0d1352', 34)
+    const hover = flower('#a9b8ff', '#2444e8', 44)
+    const press = flower('#0d1352', '#a9b8ff', 30)
+    const style = document.createElement('style')
+    style.textContent =
+      `* { cursor: ${base} !important; }` +
+      `a, a *, button, button *, [role="button"], [role="button"] *, label, label *, summary, summary *, .hero-cta, .hero-cta * { cursor: ${hover} !important; }` +
+      `input, textarea, select { cursor: text !important; }` +
+      `html.cursor-press, html.cursor-press * { cursor: ${press} !important; }`
+    document.head.appendChild(style)
+
+    const root = document.documentElement
+    const down = () => root.classList.add('cursor-press')
+    const up = () => root.classList.remove('cursor-press')
+    window.addEventListener('mousedown', down)
+    window.addEventListener('mouseup', up)
+    return () => {
+      window.removeEventListener('mousedown', down)
+      window.removeEventListener('mouseup', up)
+      root.classList.remove('cursor-press')
+      style.remove()
+    }
+  }, [])
 
   return (
     <>
-      <main className="page">
-        <header className="topbar">
-          <span className="logo">Zoé Opdendries</span>
-          <div className="meta">
-            <span>Gothenburg — SE</span>
-            <span>Developer &amp; generalist · 2026</span>
-          </div>
-        </header>
-
-        <section className="hero" id="home">
-          <h1 className="hero-name">Zoe</h1>
-
-          <div className="hero-grid">
-            <div className="hero-col left">
-              Developer &amp; generalist based in Gothenburg — moving
-              fluidly between frontend, AI, backend, and the
-              everything-else.
-            </div>
-
-            <div className="hero-portrait" aria-hidden="true">
-              <span>portrait</span>
-            </div>
-
-            <div className="hero-col right">
-              MSc in Entrepreneurship &amp; Business Design and CS at
-              Chalmers. Building across code, strategy, and IP — and
-              learning whatever the next thing turns out to be.
-            </div>
-          </div>
-
-          <div className="scrolling-tag" aria-hidden="true">
-            <div className="track">
-              {Array.from({ length: 2 }).flatMap((_, group) =>
-                ['Frontend', 'AI', 'Backend', 'Design', 'Strategy', 'Generalist'].flatMap(
-                  (word, i) => [
-                    <span key={`w-${group}-${i}`}>{word}</span>,
-                    <span key={`d-${group}-${i}`} className="dot" />,
-                  ],
-                ),
-              )}
-            </div>
-          </div>
-        </section>
-
-        <section className="about" id="about">
-          <h2 className="about-heading">about.</h2>
-          <div className="about-body">
-            <p>
-              I'm a generalist at heart, with a deep specialisation in
-              tech. I know a little bit of everything, and I've genuinely
-              come to love it that way — wearing different hats keeps
-              things interesting.
-            </p>
-            <p>
-              My foundation is technical: EGOI 2021 qualifier, years
-              building across frontend, AI, and backend systems. My MSc in
-              Entrepreneurship &amp; Business Design at Chalmers (alongside
-              CS) pushed me beyond the code — into strategy, IP, and
-              commercialisation. Previously solo built the front-end for
-              LexEnergy's EV-charger customer interface.
-            </p>
-            <p>
-              The most useful thing I bring is the ability to move fluidly
-              between the technical and the everything-else. Outside of
-              work: rock climbing, sailing, hiking, and a general
-              preference for being slightly lost somewhere interesting.
-            </p>
-            <a className="btn" href="#works" onClick={(e) => handleNav(e, 'works')}>
-              See the work
-            </a>
-          </div>
-        </section>
-
-        <section className="works" id="works">
-          <div className="section-label">
-            <h2>Selected works</h2>
-            <span className="num">— 04</span>
-          </div>
-
-          <div className="works-grid">
-            <article className="project">
-              <div className="project-card warm">
-                <span className="blob b" />
-                <span className="project-tag">— indie iOS</span>
-                <h3 className="project-title">Focus
-                  <br />Lilio</h3>
-              </div>
-              <div className="project-meta">
-                <span className="role">React Native · App-blocking Pomodoro</span>
-                <span className="year">2026</span>
-              </div>
-            </article>
-
-            <article className="project">
-              <div className="project-card olive">
-                <span className="blob a" />
-                <span className="project-tag">— frontend</span>
-                <h3 className="project-title">Lex
-                  <br />Energy</h3>
-              </div>
-              <div className="project-meta">
-                <span className="role">Solo FE · EV charger UI · React, TS</span>
-                <span className="year">'24–'25</span>
-              </div>
-            </article>
-
-            <article className="project">
-              <div className="project-card cream">
-                <span className="project-tag">— research</span>
-                <h3 className="project-title">Tooth
-                  <br />AI</h3>
-              </div>
-              <div className="project-meta">
-                <span className="role">BSc thesis · ML diagnosis of misalignment</span>
-                <span className="year">2024</span>
-              </div>
-            </article>
-
-            <article className="project">
-              <div className="project-card dark">
-                <span className="project-tag">— web</span>
-                <h3 className="project-title">Sort
-                  <br />Visualiser</h3>
-              </div>
-              <div className="project-meta">
-                <span className="role">Vue · Top 3 NTI showcase</span>
-                <span className="year">2021</span>
-              </div>
-            </article>
-          </div>
-        </section>
-
-        <section className="gallery" id="gallery">
-          <div className="section-label">
-            <h2>Gallery</h2>
-            <span className="num">— moments</span>
-          </div>
-
-          <div className="gallery-grid">
-            <div className="tile tall olive" />
-            <div className="tile cream" />
-            <div className="tile warm" />
-            <div className="tile" />
-            <div className="tile wide rust" />
-            <div className="tile cream" />
-            <div className="tile" />
-            <div className="tile olive" />
-            <div className="tile warm" />
-          </div>
-        </section>
-
-        <section className="contact" id="contact">
-          <h2 className="contact-heading">
-            let's
-            <br />
-            <em>make</em> something.
-          </h2>
-
-          <div className="contact-body">
-            <a className="email" href="mailto:zoe@zalo.se">
-              zoe@zalo.se
-            </a>
-            <div className="socials">
-              <a
-                href="https://www.tiktok.com/@zoetechandme"
-                target="_blank"
-                rel="noreferrer"
-              >
-                TikTok
-              </a>
-              <a href="#" onClick={(e) => e.preventDefault()}>YouTube</a>
-              <a href="#" onClick={(e) => e.preventDefault()}>Instagram</a>
-              <a href="#" onClick={(e) => e.preventDefault()}>GitHub</a>
-            </div>
-          </div>
-        </section>
-
-        <footer className="footer">
-          <span>© 2026 Zoe</span>
-          <span>Made in Gothenburg · @zoetechandme</span>
-        </footer>
-      </main>
-
-      <nav className={`dock ${dockHidden ? 'hidden' : ''}`} aria-label="Sections">
-        {NAV_ITEMS.map((item) => (
-          <a
-            key={item.id}
-            href={`#${item.id}`}
-            onClick={(e) => handleNav(e, item.id)}
-            className={active === item.id ? 'active' : ''}
-          >
-            {item.label}
-          </a>
-        ))}
-      </nav>
+      {/* one film-grain layer over the whole page (every route/section), so
+          the grain is consistent everywhere instead of only on the band */}
+      <div className="page-grain" aria-hidden="true" />
+      {route === 'work' ? (
+        <WorkPage onBack={goHome} onNavSection={goHomeSection} />
+      ) : (
+        <Home onNavigateWork={goWork} />
+      )}
     </>
   )
 }
