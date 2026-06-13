@@ -2,27 +2,39 @@ import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { FLOWER_D } from '../lib/svg'
 
-const CLOSE_MS = 220
+const CLOSE_MS = 260
 
-// Detail popup shared by the work grid and the journey timeline. Portalled
-// over the page; plays a short exit animation before unmounting. Closes on
-// backdrop click, the close button, or Escape.
+// Full-screen detail "page" shared by the work grid and the journey timeline.
+// Portalled over the site as a takeover (not a small popup): image banner, a
+// labelled meta strip, overview + detail copy, highlights and an optional link.
+// Plays a short exit animation before unmounting. Closes on the back button,
+// the backdrop edge, or Escape.
 export function WorkModal({
   year,
   title,
+  overview,
   body,
+  role,
   tags,
+  highlights,
+  link,
   img,
   onClose,
 }: {
   year: string
   title: string
+  // short lead paragraph shown large under the title
+  overview?: string
+  // the longer detail copy
   body: string
+  role?: string
   tags?: readonly string[]
+  highlights?: readonly string[]
+  link?: { label: string; href: string }
   img?: string
   onClose: () => void
 }) {
-  const closeRef = useRef<HTMLButtonElement>(null)
+  const backRef = useRef<HTMLButtonElement>(null)
   const [closing, setClosing] = useState(false)
   const closingRef = useRef(false)
 
@@ -40,7 +52,7 @@ export function WorkModal({
     document.addEventListener('keydown', onKey)
     const prevOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
-    closeRef.current?.focus()
+    backRef.current?.focus()
     return () => {
       document.removeEventListener('keydown', onKey)
       document.body.style.overflow = prevOverflow
@@ -49,50 +61,110 @@ export function WorkModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // overview defaults to nothing extra; if absent the detail carries the page
+  const lead = overview && overview !== body ? overview : undefined
+
   return createPortal(
     <div
-      className={`milestone-overlay${closing ? ' is-closing' : ''}`}
-      onClick={requestClose}
+      className={`workdetail${closing ? ' is-closing' : ''}`}
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+      onClick={(e) => {
+        // only the scroll container (the backdrop edge), not its children
+        if (e.target === e.currentTarget) requestClose()
+      }}
     >
-      <div
-        className="milestone-shell"
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <svg className="milestone-flower" viewBox="0 0 100 100" aria-hidden="true">
-          <path className="milestone-flower-petals" d={FLOWER_D} />
-          <circle className="milestone-flower-center" cx="50" cy="50" r="14" />
-        </svg>
-        <button
-          ref={closeRef}
-          className="milestone-close"
-          onClick={requestClose}
-          aria-label="Close"
-        >
-          ×
-        </button>
-        <div className={`milestone-modal${img ? ' has-img' : ''}`}>
-          {img && (
-            <div className="milestone-media">
-              <img className="milestone-img" src={img} alt="" />
+      <article className="workdetail-page">
+        <header className="workdetail-bar">
+          <button
+            ref={backRef}
+            className="workdetail-back"
+            onClick={requestClose}
+            aria-label="Back"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M19 12H5M11 6l-6 6 6 6" />
+            </svg>
+            Back
+          </button>
+          <svg
+            className="workdetail-mark"
+            viewBox="0 0 100 100"
+            aria-hidden="true"
+          >
+            <path className="workdetail-mark-petals" d={FLOWER_D} />
+            <circle className="workdetail-mark-center" cx="50" cy="50" r="14" />
+          </svg>
+        </header>
+
+        {img && (
+          <div className="workdetail-hero">
+            <img className="workdetail-img" src={img} alt="" />
+          </div>
+        )}
+
+        <div className="workdetail-intro">
+          <span className="workdetail-year">{year}</span>
+          <h1 className="workdetail-title">{title}</h1>
+          {lead && <p className="workdetail-lead">{lead}</p>}
+        </div>
+
+        {(role || (tags && tags.length > 0)) && (
+          <dl className="workdetail-meta">
+            {role && (
+              <div className="workdetail-meta-cell">
+                <dt>Role</dt>
+                <dd>{role}</dd>
+              </div>
+            )}
+            <div className="workdetail-meta-cell">
+              <dt>Year</dt>
+              <dd>{year}</dd>
             </div>
-          )}
-          <div className="milestone-body">
-            <span className="milestone-year">{year}</span>
-            <h3 className="milestone-title">{title}</h3>
-            <p className="milestone-detail">{body}</p>
             {tags && tags.length > 0 && (
-              <ul className="milestone-tags">
-                {tags.map((t) => (
-                  <li key={t}>{t}</li>
+              <div className="workdetail-meta-cell">
+                <dt>Stack</dt>
+                <dd>{tags.join(' · ')}</dd>
+              </div>
+            )}
+          </dl>
+        )}
+
+        <div className="workdetail-content">
+          <p className="workdetail-body">{body}</p>
+
+          {highlights && highlights.length > 0 && (
+            <div className="workdetail-highlights">
+              <h2 className="workdetail-h">Highlights</h2>
+              <ul>
+                {highlights.map((h) => (
+                  <li key={h}>
+                    <svg viewBox="0 0 100 100" aria-hidden="true">
+                      <path d={FLOWER_D} />
+                    </svg>
+                    <span>{h}</span>
+                  </li>
                 ))}
               </ul>
-            )}
-          </div>
+            </div>
+          )}
+
+          {link && (
+            <a
+              className="workdetail-link"
+              href={link.href}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {link.label}
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M7 17 17 7M9 7h8v8" />
+              </svg>
+            </a>
+          )}
         </div>
-      </div>
+      </article>
     </div>,
     document.body,
   )

@@ -14,6 +14,9 @@ function App() {
   // Where the landing page was scrolled when we left for /work, so Back
   // returns you to the same spot rather than the top.
   const homeScroll = useRef(0)
+  // A section to scroll to after we land back on Home (set when a nav link is
+  // clicked from /work). Overrides the saved scroll for that one transition.
+  const pendingSection = useRef<string | null>(null)
 
   // We restore scroll ourselves on route changes; stop the browser fighting us.
   useEffect(() => {
@@ -32,6 +35,22 @@ function App() {
   // After landing back on Home, jump to the saved scroll position; Work
   // always opens at the top.
   useLayoutEffect(() => {
+    // A nav link from /work asked for a specific section: jump there instead
+    // of the saved scroll position.
+    if (route === 'home' && pendingSection.current) {
+      const id = pendingSection.current
+      pendingSection.current = null
+      requestAnimationFrame(() => {
+        if (id === 'home') {
+          window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
+        } else {
+          document
+            .getElementById(id)
+            ?.scrollIntoView({ behavior: 'instant' as ScrollBehavior, block: 'start' })
+        }
+      })
+      return
+    }
     const y = route === 'home' ? homeScroll.current : 0
     requestAnimationFrame(() =>
       window.scrollTo({ top: y, behavior: 'instant' as ScrollBehavior }),
@@ -54,6 +73,14 @@ function App() {
 
   const goWork = useCallback(() => navigate('work'), [navigate])
   const goHome = useCallback(() => navigate('home'), [navigate])
+  // From /work: return to Home and scroll to a given section.
+  const goHomeSection = useCallback(
+    (id: string) => {
+      pendingSection.current = id
+      navigate('home')
+    },
+    [navigate],
+  )
 
   // Flower-shaped cursor site-wide: blooms bigger on clickable things and
   // changes colour while pressed. Text fields keep a caret. Site-wide so it
@@ -91,10 +118,17 @@ function App() {
     }
   }, [])
 
-  return route === 'work' ? (
-    <WorkPage onBack={goHome} />
-  ) : (
-    <Home onNavigateWork={goWork} />
+  return (
+    <>
+      {/* one film-grain layer over the whole page (every route/section), so
+          the grain is consistent everywhere instead of only on the band */}
+      <div className="page-grain" aria-hidden="true" />
+      {route === 'work' ? (
+        <WorkPage onBack={goHome} onNavSection={goHomeSection} />
+      ) : (
+        <Home onNavigateWork={goWork} />
+      )}
+    </>
   )
 }
 

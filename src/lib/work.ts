@@ -26,6 +26,13 @@ export type WorkItem = {
   icon?: 'flower' | 'rings'
   // featured tiles span two columns in the bento
   featured?: boolean
+  // --- detail-page extras (all optional) ---
+  // my role on the project, shown in the meta strip
+  role?: string
+  // short bulleted takeaways shown under the overview
+  highlights?: readonly string[]
+  // outbound link (live site, App Store, repo…) shown as a button
+  link?: { label: string; href: string }
 }
 
 export const WORK: readonly WorkItem[] = [
@@ -41,6 +48,12 @@ export const WORK: readonly WorkItem[] = [
     tags: ['iOS', 'Product design'],
     icon: 'flower',
     featured: true,
+    role: 'Designer & developer',
+    highlights: [
+      'Care reminders tuned to the plants you actually own',
+      'Designed and built end to end, solo',
+      'Buy-once — no subscription',
+    ],
   },
   {
     id: 'focus-lilio',
@@ -53,6 +66,12 @@ export const WORK: readonly WorkItem[] = [
     categories: ['apps', 'design', 'code'],
     tags: ['iOS', 'Product design'],
     icon: 'rings',
+    role: 'Designer & developer',
+    highlights: [
+      'Makes deep work the path of least resistance',
+      'Designed and built end to end, solo',
+      'Launching soon',
+    ],
   },
   {
     id: 'lexenergy',
@@ -66,6 +85,12 @@ export const WORK: readonly WorkItem[] = [
     tags: ['React', 'TypeScript', 'Figma'],
     img: lexImg,
     featured: true,
+    role: 'Sole frontend developer',
+    highlights: [
+      'Sole owner of the customer-facing frontend',
+      'Designed in Figma, shipped in React + TypeScript',
+      'The live interface drivers use to start, monitor and pay for a charge',
+    ],
   },
   {
     id: 'thesis',
@@ -78,6 +103,12 @@ export const WORK: readonly WorkItem[] = [
     categories: ['code'],
     tags: ['AI / ML'],
     img: teethImg,
+    role: 'Researcher & developer',
+    highlights: [
+      'Diagnoses misaligned teeth from clinical imagery',
+      'Real machine learning on a problem with human impact',
+      'Bachelor thesis at Chalmers',
+    ],
   },
   {
     id: 'cesa',
@@ -89,6 +120,12 @@ export const WORK: readonly WorkItem[] = [
       'Core volunteer in a Chalmers initiative bringing tech access to South African schools — from raising the funding and planning the logistics to being on site setting everything up.',
     categories: ['impact'],
     img: cesaImg,
+    role: 'Core volunteer',
+    highlights: [
+      'Raised funding and planned logistics',
+      'On site setting everything up',
+      'Bringing tech access to South African schools',
+    ],
   },
   {
     id: 'velra',
@@ -99,6 +136,7 @@ export const WORK: readonly WorkItem[] = [
     detail:
       'Velra is the company I’m founding through my entrepreneurship master’s — a Chalmers × Lund venture aimed at the energy market. The current phase is validation: pressure-testing the model and proving there’s genuine market need before building further.',
     categories: ['business'],
+    role: 'Co-founder',
   },
   {
     id: 'dia-aid',
@@ -109,6 +147,7 @@ export const WORK: readonly WorkItem[] = [
     detail:
       'A full business analysis for the startup Dia Aid, done as a 7.5 hp course project — mapping their market, model and the strategic options on the table.',
     categories: ['business'],
+    role: 'Business analyst',
   },
   {
     id: 'events-pr',
@@ -120,6 +159,7 @@ export const WORK: readonly WorkItem[] = [
       'PR lead for major student events at Chalmers — posters, visual identities and social campaigns built in Figma, Photoshop and Illustrator.',
     categories: ['design'],
     tags: ['Figma', 'Photoshop', 'Illustrator'],
+    role: 'PR lead',
   },
   {
     id: 'egoi',
@@ -130,6 +170,7 @@ export const WORK: readonly WorkItem[] = [
     detail:
       'Qualified for the European Girls’ Olympiad in Informatics — competitive programming at the national level, back where the code habit got serious.',
     categories: ['code'],
+    role: 'Competitor',
   },
   {
     id: 'ericsson',
@@ -140,5 +181,6 @@ export const WORK: readonly WorkItem[] = [
     detail:
       'A summer as IT technician at Ericsson — my first time inside a large enterprise tech organisation. Hands-on with hardware and server-room operations, learning how production infrastructure is run at scale.',
     categories: ['code'],
+    role: 'IT technician intern',
   },
 ]

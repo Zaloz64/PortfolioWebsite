@@ -1,8 +1,8 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
-import { CLOUD_D, FLOWER_D, scallopOutline } from '../lib/svg'
+import { useEffect, useRef, useState } from 'react'
+import { FLOWER_D } from '../lib/svg'
 import { useInView } from '../hooks'
 import { WorkModal } from '../components/WorkModal'
+import meImg from '../assets/me.jpg'
 import cesaImg from '../assets/cesa.jpg'
 import teethImg from '../assets/teeth.jpg'
 import lexImg from '../assets/lexenergy.jpg'
@@ -12,10 +12,14 @@ type Milestone = {
   year: string
   title: string
   body: string
-  // Longer copy shown in the click-through modal. Only the substantial
+  // Longer copy shown in the click-through detail page. Only the substantial
   // work/credibility milestones have one — those become clickable.
   detail?: string
   tags?: readonly string[]
+  // detail-page extras (optional), mirror of lib/work.ts WorkItem
+  role?: string
+  highlights?: readonly string[]
+  link?: { label: string; href: string }
 }
 
 const JOURNEY: readonly Milestone[] = [
@@ -44,6 +48,7 @@ const JOURNEY: readonly Milestone[] = [
     body: 'IT technician internship — hardware and server-room operations in an enterprise environment.',
     detail:
       'A summer as IT technician at Ericsson — my first time inside a large enterprise tech organisation. Hands-on with hardware and server-room operations, learning how production infrastructure is actually run and kept alive at scale.',
+    role: 'IT technician intern',
     // TODO: add one concrete responsibility or project to make this land harder.
   },
   {
@@ -54,6 +59,12 @@ const JOURNEY: readonly Milestone[] = [
     detail:
       'Bachelor of Science in Information Technology at Chalmers. My thesis built an AI system that diagnoses misaligned teeth from clinical imagery — pairing real machine learning with a problem that has direct, human impact.',
     tags: ['AI / ML'],
+    role: 'Researcher & developer',
+    highlights: [
+      'Diagnoses misaligned teeth from clinical imagery',
+      'Real machine learning on a problem with human impact',
+      'Bachelor thesis at Chalmers',
+    ],
     // TODO: add the approach (model / dataset) and any accuracy or result worth quoting.
   },
   {
@@ -76,6 +87,12 @@ const JOURNEY: readonly Milestone[] = [
     detail:
       'I solo-built the customer-facing frontend for LexEnergy’s EV charger network — the live interface drivers actually use at a station to start, monitor and pay for a charge. Sole frontend owner, from design in Figma through to shipped React + TypeScript.',
     tags: ['React', 'TypeScript', 'Figma', 'Frontend'],
+    role: 'Sole frontend developer',
+    highlights: [
+      'Sole owner of the customer-facing frontend',
+      'Designed in Figma, shipped in React + TypeScript',
+      'The live interface drivers use to start, monitor and pay for a charge',
+    ],
     // TODO: add scale worth bragging about — stations live, drivers served, anything measurable.
   },
   {
@@ -103,6 +120,7 @@ const JOURNEY: readonly Milestone[] = [
     body: 'Founding an energy-market startup through the master’s — a Chalmers × Lund venture. The work right now: proving real market need.',
     detail:
       'Velra is the company I’m founding through my entrepreneurship master’s — a Chalmers × Lund venture aimed at the energy market. The current phase is validation: pressure-testing the model and proving there’s genuine market need before building further.',
+    role: 'Co-founder',
     // TODO: confirm 'Velra' is the final name, and add the specific problem/segment when you can share it.
   },
   {
@@ -113,72 +131,47 @@ const JOURNEY: readonly Milestone[] = [
     detail:
       'On my own time I design, build and ship iOS apps end to end. Flower Power (plant care) and Focus Lilio (deep work) are first to launch, with more behind them — the build-in-public side of how I work.',
     tags: ['iOS'],
+    role: 'Designer & developer',
+    highlights: [
+      'Design, build and ship iOS apps end to end',
+      'Flower Power and Focus Lilio first to launch',
+      'Built in public',
+    ],
     // TODO: add a launch window + App Store / waitlist link once live.
   },
 ]
 
-// The 3 highlights shown before "See full journey" is clicked.
-const TOP_JOURNEY_IDS = ['bsc', 'cesa', 'ev-screen']
-
-// Optional photo per milestone (keyed by id).
+// Optional photo per milestone (keyed by id), shown at the top of a card.
 const JOURNEY_IMAGES: Record<string, string> = {
   bsc: teethImg,
   cesa: cesaImg,
   'ev-screen': lexImg,
 }
 
-function ScallopButton({
-  onClick,
-  children,
-}: {
-  onClick: () => void
-  children: React.ReactNode
-}) {
-  const ref = useRef<HTMLButtonElement>(null)
-  const [dims, setDims] = useState({ w: 0, h: 0 })
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const update = () => setDims({ w: el.offsetWidth, h: el.offsetHeight })
-    update()
-    const ro = new ResizeObserver(update)
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [children])
-  const d = scallopOutline(dims.w, dims.h)
-  return (
-    <button ref={ref} className="journey-toggle" onClick={onClick}>
-      {d && (
-        <svg
-          className="scallop-btn-border"
-          viewBox={`0 0 ${dims.w} ${dims.h}`}
-          preserveAspectRatio="none"
-          aria-hidden="true"
-        >
-          <path d={d} />
-        </svg>
-      )}
-      <span className="journey-toggle-label">{children}</span>
-    </button>
-  )
-}
+// The big side portrait — a single background-free cutout of me. Drop a
+// transparent PNG into src/assets and point this at it (e.g. me-cutout.png)
+// for the true floating-cutout look; `me.jpg` is a placeholder until then.
+const PORTRAIT_CUTOUT = meImg
 
-// A single milestone card. When the milestone has `detail`, it becomes a
-// button that opens the modal; otherwise it's a plain, non-interactive card.
-function MilestoneCard({
+// One milestone on the timeline: a photo (when it has one), a bold year and a
+// short note, alternating sides of a central dashed line. Entries with `detail`
+// are clickable and open the shared full-page WorkModal.
+function TimelineItem({
   item,
+  current,
   onOpen,
 }: {
   item: Milestone
+  current: boolean
   onOpen: (id: string) => void
 }) {
   const clickable = !!item.detail
   const img = JOURNEY_IMAGES[item.id]
   return (
-    <article
-      className={`top3-card ${img ? 'has-img' : ''} ${
-        clickable ? 'is-clickable' : ''
-      }`}
+    <li
+      className={`jtl-item ${clickable ? 'is-clickable' : ''} ${
+        img ? 'has-photo' : ''
+      } ${current ? 'is-current' : ''}`}
       {...(clickable
         ? {
             role: 'button',
@@ -194,206 +187,199 @@ function MilestoneCard({
           }
         : {})}
     >
-      {img && <img className="top3-bg" src={img} alt="" />}
-      <span className="top3-year">{item.year}</span>
-      <h3 className="top3-title">{item.title}</h3>
-      <p className="top3-body">{item.body}</p>
-      {clickable && (
-        <span className="top3-more" aria-hidden="true">
-          Read more →
-        </span>
-      )}
-    </article>
+      <span className="jtl-dot" aria-hidden="true" />
+      <span className="jtl-flower" aria-hidden="true">
+        <svg viewBox="0 0 100 100">
+          <path className="jtl-flower-petals" d={FLOWER_D} />
+          <circle className="jtl-flower-center" cx="50" cy="50" r="14" />
+        </svg>
+      </span>
+      <div className="jtl-entry">
+        {img && <img className="jtl-photo" src={img} alt="" />}
+        <span className="jtl-year">{item.year}</span>
+        <h3 className="jtl-title">{item.title}</h3>
+        <p className="jtl-body">{item.body}</p>
+        {item.tags && item.tags.length > 0 && (
+          <ul className="jtl-tags">
+            {item.tags.map((t) => (
+              <li key={t}>{t}</li>
+            ))}
+          </ul>
+        )}
+        {clickable && (
+          <span className="jtl-more" aria-hidden="true">
+            Read more →
+          </span>
+        )}
+      </div>
+    </li>
   )
 }
 
-// The click-through detail view is the shared WorkModal (see
-// components/WorkModal.tsx), fed from this file's milestone data.
-
 export function JourneySection() {
-  const [showAll, setShowAll] = useState(false)
-  const [cloud, setCloud] = useState(false)
-  const [cloudPos, setCloudPos] = useState({ x: 0, y: 0 })
-  const railRef = useRef<HTMLDivElement>(null)
-  const trackRef = useRef<HTMLDivElement>(null)
-  const [sectionRef, inView] = useInView<HTMLElement>()
-  const [active, setActive] = useState(0)
-  const [trackH, setTrackH] = useState(0)
+  const [sectionRef, inView] = useInView<HTMLElement>(0.05)
+  const railRef = useRef<HTMLOListElement>(null)
+  const viewportRef = useRef<HTMLDivElement>(null)
   const [openId, setOpenId] = useState<string | null>(null)
-  const pinned = showAll && trackH > 0
-  const collapsingRef = useRef(false)
-  const expandingRef = useRef(false)
+  const [active, setActive] = useState(0)
+  // > 0 only on desktop, once measured — drives the pinned scroll layout
+  const [sectionH, setSectionH] = useState(0)
+  const pinned = sectionH > 0
   const openItem = openId ? JOURNEY.find((j) => j.id === openId) ?? null : null
 
-  const items = showAll
-    ? JOURNEY
-    : JOURNEY.filter((j) => TOP_JOURNEY_IDS.includes(j.id))
-
-  const reset = (next: boolean) => {
-    setShowAll(next)
-    setActive(0)
-    if (railRef.current) railRef.current.scrollLeft = 0
-  }
-
-  // Collapsing the timeline shrinks the section by several screens, which would
-  // otherwise leave you stranded down by the footer. Re-centre on the journey
-  // once the (now short) layout has committed. Expanding instead jumps to the
-  // section top so the scrub starts at the first milestone, not partway in.
-  useLayoutEffect(() => {
-    const section = sectionRef.current
-    if (!section) return
-    if (collapsingRef.current) {
-      collapsingRef.current = false
-      const docTop = section.getBoundingClientRect().top + window.scrollY
-      const target = docTop + section.offsetHeight / 2 - window.innerHeight / 2
-      window.scrollTo({ top: Math.max(0, target) })
-      return
-    }
-    if (expandingRef.current) {
-      expandingRef.current = false
-      const docTop = section.getBoundingClientRect().top + window.scrollY
-      window.scrollTo({ top: docTop })
-    }
-  }, [showAll, sectionRef])
-
-  // Native horizontal scroll (mobile / before pinning): track which card is
-  // centred. When pinned, the pin effect owns this instead.
+  // Scroll-driven pin (desktop, motion ok): the section is inflated to
+  // viewport + the rail's vertical overflow; page scroll through it translates
+  // the rail past the sticky portrait, and picks the centred milestone.
   useEffect(() => {
-    const el = railRef.current
-    if (!el || !showAll || pinned) return
-    let raf: number | null = null
-    const update = () => {
-      const center = el.scrollLeft + el.clientWidth / 2
-      const cards = Array.from(el.querySelectorAll<HTMLElement>('.vt-item'))
-      let best = 0
-      let bestDist = Infinity
-      cards.forEach((c, i) => {
-        const mid = c.offsetLeft + c.offsetWidth / 2
-        const d = Math.abs(mid - center)
-        if (d < bestDist) {
-          bestDist = d
-          best = i
-        }
-      })
-      setActive(best)
-    }
-    const onScroll = () => {
-      if (raf !== null) return
-      raf = requestAnimationFrame(() => {
-        update()
-        raf = null
-      })
-    }
-    update()
-    el.addEventListener('scroll', onScroll, { passive: true })
-    window.addEventListener('resize', onScroll)
-    return () => {
-      if (raf !== null) cancelAnimationFrame(raf)
-      el.removeEventListener('scroll', onScroll)
-      window.removeEventListener('resize', onScroll)
-    }
-  }, [showAll, pinned])
-
-  // Full timeline → pin the section and drive the rail horizontally with the
-  // page's vertical scroll (desktop only). Track height = viewport + the rail's
-  // horizontal overflow, so one scroll-through finishes the timeline exactly.
-  useEffect(() => {
-    const desktop = window.matchMedia('(min-width: 721px)')
-    if (!showAll || !desktop.matches) {
-      setTrackH(0)
-      return
-    }
-    const rail = railRef.current
-    const track = trackRef.current
-    if (!rail || !track) return
-    const measure = () => {
-      const max = track.scrollWidth - rail.clientWidth
-      setTrackH(max > 0 ? window.innerHeight + max : 0)
-    }
-    measure()
-    const ro = new ResizeObserver(measure)
-    ro.observe(track)
-    window.addEventListener('resize', measure)
-    return () => {
-      ro.disconnect()
-      window.removeEventListener('resize', measure)
-    }
-  }, [showAll])
-
-  // Map page scroll through the pinned section onto a translateX of the track.
-  // The rail uses `overflow: clip` (not a scroll container), so the vertical
-  // wheel passes straight through to the page with full native momentum.
-  useEffect(() => {
-    if (!showAll || trackH === 0) return
+    const desktop = window.matchMedia('(min-width: 861px)')
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const enabled = () => desktop.matches && !reduce.matches
     const section = sectionRef.current
     const rail = railRef.current
-    const track = trackRef.current
-    if (!section || !rail || !track) return
+    const viewport = viewportRef.current
+    if (!section || !rail || !viewport) return
+
+    let railMax = 0
     let raf: number | null = null
+    // snap-to-nearest when the user rests between entries
+    const STILL_MS = 150
+    const SNAP_MS = 520
+    let stillTimer: number | null = null
+    let snapRaf: number | null = null
+    let snapping = false
+
     const apply = () => {
-      const max = track.scrollWidth - rail.clientWidth
-      const total = section.offsetHeight - window.innerHeight
-      const scrolled = -section.getBoundingClientRect().top
-      const p = total > 0 ? Math.min(1, Math.max(0, scrolled / total)) : 0
-      const shift = p * max
-      track.style.transform = `translateX(${-shift}px)`
-      // active card = the one nearest the viewport centre
-      const center = shift + rail.clientWidth / 2
-      const cards = track.children
+      raf = null
+      if (!enabled() || railMax === 0) return
+      // shift == how far we've scrolled into the section (total === railMax)
+      const shift = Math.min(railMax, Math.max(0, -section.getBoundingClientRect().top))
+      rail.style.transform = `translateY(${-shift}px)`
+      // active = the entry whose centre is nearest the viewport centre
+      const centerY = window.innerHeight / 2
+      const items = rail.children
       let best = 0
       let bestDist = Infinity
-      for (let i = 0; i < cards.length; i++) {
-        const c = cards[i] as HTMLElement
-        const mid = c.offsetLeft + c.offsetWidth / 2
-        const d = Math.abs(mid - center)
+      for (let i = 0; i < items.length; i++) {
+        const r = (items[i] as HTMLElement).getBoundingClientRect()
+        const mid = r.top + r.height / 2
+        const d = Math.abs(mid - centerY)
         if (d < bestDist) {
           bestDist = d
           best = i
         }
       }
       setActive(best)
-      raf = null
     }
+
+    // page scrollY that centres the entry nearest the viewport centre — or null
+    // if we're not really near any entry (so the section can still be left).
+    const snapTarget = (): number | null => {
+      const vh = window.innerHeight
+      const items = rail.children
+      const sectionTopDoc = section.getBoundingClientRect().top + window.scrollY
+      let best: HTMLElement | null = null
+      let bestDist = Infinity
+      for (let i = 0; i < items.length; i++) {
+        const el = items[i] as HTMLElement
+        const r = el.getBoundingClientRect()
+        const d = Math.abs(r.top + r.height / 2 - vh / 2)
+        if (d < bestDist) {
+          bestDist = d
+          best = el
+        }
+      }
+      if (!best || bestDist > vh * 0.42) return null
+      const shift = best.offsetTop + best.offsetHeight / 2 - vh / 2
+      const target = sectionTopDoc + Math.min(railMax, Math.max(0, shift))
+      return Math.abs(target - window.scrollY) < 2 ? null : target
+    }
+
+    const easeInOutCubic = (t: number) =>
+      t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+
+    const animateTo = (targetY: number) => {
+      const startY = window.scrollY
+      const dist = targetY - startY
+      const startT = performance.now()
+      snapping = true
+      const step = () => {
+        const e = easeInOutCubic(Math.min(1, (performance.now() - startT) / SNAP_MS))
+        window.scrollTo({ top: startY + dist * e, behavior: 'instant' as ScrollBehavior })
+        if (e < 1) {
+          snapRaf = requestAnimationFrame(step)
+        } else {
+          snapRaf = null
+          snapping = false
+        }
+      }
+      snapRaf = requestAnimationFrame(step)
+    }
+
+    const cancelSnap = () => {
+      if (snapRaf !== null) {
+        cancelAnimationFrame(snapRaf)
+        snapRaf = null
+      }
+      snapping = false
+    }
+
+    const measure = () => {
+      if (!enabled()) {
+        railMax = 0
+        rail.style.transform = ''
+        setSectionH(0)
+        setActive(0)
+        return
+      }
+      // measure against the viewport height (the pinned column will be 100vh),
+      // not the rail's own box — that box is only constrained once pinned
+      railMax = Math.max(0, rail.scrollHeight - window.innerHeight)
+      setSectionH(railMax > 0 ? window.innerHeight + railMax : 0)
+      apply()
+    }
+
     const onScroll = () => {
-      if (raf !== null) return
-      raf = requestAnimationFrame(apply)
+      if (raf === null) raf = requestAnimationFrame(apply)
+      // arm the snap once scrolling settles (unless we're mid-snap)
+      if (snapping) return
+      if (stillTimer !== null) clearTimeout(stillTimer)
+      stillTimer = window.setTimeout(() => {
+        if (!enabled() || railMax === 0) return
+        const t = snapTarget()
+        if (t !== null) animateTo(t)
+      }, STILL_MS)
     }
-    apply()
+
+    const onUserInput = () => {
+      cancelSnap()
+      if (stillTimer !== null) clearTimeout(stillTimer)
+    }
+
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(rail)
     window.addEventListener('scroll', onScroll, { passive: true })
-    window.addEventListener('resize', onScroll)
+    window.addEventListener('resize', measure)
+    window.addEventListener('wheel', onUserInput, { passive: true })
+    window.addEventListener('touchstart', onUserInput, { passive: true })
+    desktop.addEventListener('change', measure)
+    reduce.addEventListener('change', measure)
     return () => {
       if (raf !== null) cancelAnimationFrame(raf)
+      if (snapRaf !== null) cancelAnimationFrame(snapRaf)
+      if (stillTimer !== null) clearTimeout(stillTimer)
+      ro.disconnect()
       window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('resize', onScroll)
-      track.style.transform = ''
+      window.removeEventListener('resize', measure)
+      window.removeEventListener('wheel', onUserInput)
+      window.removeEventListener('touchstart', onUserInput)
+      desktop.removeEventListener('change', measure)
+      reduce.removeEventListener('change', measure)
+      rail.style.transform = ''
     }
-  }, [showAll, trackH, sectionRef])
+  }, [sectionRef])
 
-  const toggle = () => {
-    if (showAll) {
-      collapsingRef.current = true
-      reset(false)
-      return
-    }
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (reduce) {
-      expandingRef.current = true
-      reset(true)
-      return
-    }
-    const btn = document.querySelector('.journey-toggle')
-    const rect = btn?.getBoundingClientRect()
-    setCloudPos({
-      x: rect ? rect.left + rect.width / 2 : window.innerWidth / 2,
-      y: rect ? rect.top + rect.height / 2 : window.innerHeight / 2,
-    })
-    setCloud(true)
-    window.setTimeout(() => {
-      expandingRef.current = true
-      reset(true)
-    }, 520)
-    window.setTimeout(() => setCloud(false), 1120)
-  }
+  const activeItem = JOURNEY[active]
 
   return (
     <section
@@ -402,85 +388,57 @@ export function JourneySection() {
       }`}
       id="journey"
       ref={sectionRef}
-      style={pinned ? { height: trackH } : undefined}
+      style={pinned ? { height: sectionH } : undefined}
     >
-      <div className="journey-inner">
-      <span className="journey-watermark" aria-hidden="true">
-        journey
-      </span>
-      <div className="journey-head">
+      {/* heading shown on mobile (on desktop it lives in the portrait caption) */}
+      <div className="journey-head journey-head--mobile">
         <div className="section-heading">
-          <span className="section-eyebrow">
-            {showAll
-              ? 'My journey — where it started'
-              : 'My journey — a few highlights'}
-          </span>
+          <span className="section-eyebrow">My journey — where it started</span>
         </div>
       </div>
 
-      {!showAll && (
-        <div className="journey-top3">
-          {items.map((item) => (
-            <MilestoneCard key={item.id} item={item} onOpen={setOpenId} />
-          ))}
-        </div>
-      )}
-
-      {showAll && (
-        <div className="vtimeline" ref={railRef}>
-          <div className="vt-track" ref={trackRef}>
-          {items.map((item, i) => (
-            <div
-              key={item.id}
-              className={`vt-item ${i === active ? 'is-active' : ''}`}
-              style={
-                { animationDelay: `${Math.min(i, 7) * 0.07}s` } as React.CSSProperties
-              }
-            >
-              <span className="vt-node" aria-hidden="true">
-                <svg className="vt-flower" viewBox="0 0 100 100">
-                  <path className="vt-flower-petals" d={FLOWER_D} />
-                  <circle className="vt-flower-center" cx="50" cy="50" r="14" />
-                </svg>
-              </span>
-              <MilestoneCard item={item} onOpen={setOpenId} />
-            </div>
-          ))}
+      <div className="journey-pin">
+        <div className="journey-portrait">
+          <img
+            className="journey-portrait-img"
+            src={PORTRAIT_CUTOUT}
+            alt="Portrait of Zoë"
+          />
+          <div className="journey-portrait-cap">
+            <span className="section-eyebrow">My journey</span>
+            <span className="journey-cap-year">{activeItem.year}</span>
+            <span className="journey-cap-title">{activeItem.title}</span>
           </div>
         </div>
-      )}
 
-      <div className="journey-actions">
-        <ScallopButton onClick={toggle}>
-          {showAll ? 'Show less' : 'See the full journey'}
-        </ScallopButton>
-      </div>
+        <div className="jtl-viewport" ref={viewportRef}>
+          <ol className="jtl" ref={railRef}>
+            {JOURNEY.map((item, i) => (
+              <TimelineItem
+                key={item.id}
+                item={item}
+                current={pinned && i === active}
+                onOpen={setOpenId}
+              />
+            ))}
+          </ol>
+        </div>
       </div>
 
       {openItem && (
         <WorkModal
           year={openItem.year}
           title={openItem.title}
+          overview={openItem.body}
           body={openItem.detail ?? openItem.body}
+          role={openItem.role}
           tags={openItem.tags}
+          highlights={openItem.highlights}
+          link={openItem.link}
           img={JOURNEY_IMAGES[openItem.id]}
           onClose={() => setOpenId(null)}
         />
       )}
-
-      {cloud &&
-        createPortal(
-          <div className="journey-cloud" aria-hidden="true">
-            <svg
-              className="cloud-blob"
-              viewBox="0 0 100 100"
-              style={{ left: cloudPos.x, top: cloudPos.y }}
-            >
-              <path d={CLOUD_D} />
-            </svg>
-          </div>,
-          document.body,
-        )}
     </section>
   )
 }
