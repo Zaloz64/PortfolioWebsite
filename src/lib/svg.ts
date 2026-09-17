@@ -1,11 +1,36 @@
 // SVG path generators for the recurring scalloped borders, flower motif, and
 // transition blobs. Pure functions returning path `d` strings.
 
-export function buildScallopPath(w: number, h: number, expand = 0): string {
+export function buildScallopPath(
+  w: number,
+  h: number,
+  expand = 0,
+  bottomOnly = false,
+): string {
   const isMobile = w < 700
   const baseInset = isMobile ? 22 : 30
   const inset = Math.max(8, Math.min(baseInset, h * 0.25))
   const target = isMobile ? 30 : 44
+
+  // Flush top/left/right edges; scallop only the bottom (used by the work
+  // band, which sits mid-viewport so the side bumps would otherwise show).
+  if (bottomOnly) {
+    const nW = Math.max(2, Math.round(w / target))
+    const sW = w / nW
+    const rW = sW / 2
+    const yb = h - rW
+    if (yb <= 0) return ''
+    const parts: string[] = [
+      'M 0 0',
+      `L ${w.toFixed(2)} 0`,
+      `L ${w.toFixed(2)} ${yb.toFixed(2)}`,
+    ]
+    for (let i = 0; i < nW; i++)
+      parts.push(`a ${rW.toFixed(2)} ${rW.toFixed(2)} 0 0 1 ${(-sW).toFixed(2)} 0`)
+    parts.push('Z')
+    return parts.join(' ')
+  }
+
   const x0 = inset - expand
   const y0 = inset - expand
   const x1 = w - inset + expand

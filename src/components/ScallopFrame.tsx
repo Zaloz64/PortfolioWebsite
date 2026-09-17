@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { buildScallopPath } from '../lib/svg'
 import landingImg from '../assets/landing.jpeg'
 
@@ -7,9 +7,11 @@ import landingImg from '../assets/landing.jpeg'
 export function ScallopFrame({
   expand = 0,
   photoOpacity = 1,
+  bottomOnly = false,
 }: {
   expand?: number
   photoOpacity?: number
+  bottomOnly?: boolean
 }) {
   const ref = useRef<SVGSVGElement>(null)
   const [dims, setDims] = useState({ w: 0, h: 0 })
@@ -17,14 +19,31 @@ export function ScallopFrame({
   useEffect(() => {
     const el = ref.current
     if (!el) return
-    const update = () => setDims({ w: el.clientWidth, h: el.clientHeight })
+    // Quantise the measured box: as the band shrinks pixel-by-pixel on scroll,
+    // this lets the (expensive) path + clipped photo only rebuild every ~16px
+    // instead of every frame. Same-value updates bail, so React doesn't re-render.
+    const Q = 16
+    const update = () => {
+      const w = Math.round(el.clientWidth / Q) * Q
+      const h = Math.round(el.clientHeight / Q) * Q
+      setDims((d) => (d.w === w && d.h === h ? d : { w, h }))
+    }
     update()
     const ro = new ResizeObserver(update)
     ro.observe(el)
     return () => ro.disconnect()
   }, [])
 
-  const path = dims.w && dims.h ? buildScallopPath(dims.w, dims.h, expand) : ''
+  // Quantise expand too — it ramps with scrollY, so without this the path would
+  // rebuild every frame even though the box is steady.
+  const qExpand = Math.round(expand / 8) * 8
+  const path = useMemo(
+    () =>
+      dims.w && dims.h
+        ? buildScallopPath(dims.w, dims.h, qExpand, bottomOnly)
+        : '',
+    [dims.w, dims.h, qExpand, bottomOnly],
+  )
 
   return (
     <svg

@@ -1,10 +1,85 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { FLOWER_D } from './lib/svg'
 import { NAV_HEIGHT } from './lib/constants'
 import { WORK, WORK_CATEGORIES, type WorkCategory } from './lib/work'
 import { WorkModal } from './components/WorkModal'
 import { SiteNav } from './components/SiteNav'
 import { ScallopFrame } from './components/ScallopFrame'
+
+type Filter = WorkCategory | 'all'
+type Sort = 'curated' | 'newest' | 'type'
+
+const SORTS: { id: Sort; label: string }[] = [
+  { id: 'curated', label: 'Curated' },
+  { id: 'newest', label: 'Newest' },
+  { id: 'type', label: 'By type' },
+]
+
+// Sortable year: 'Now'/'Soon' read as latest; otherwise the largest 4-digit
+// year found (so a range like '2024–25' sorts on 2024).
+const yearKey = (y: string): number => {
+  if (/now|soon/i.test(y)) return 9999
+  const m = y.match(/\d{4}/g)
+  return m ? Math.max(...m.map(Number)) : 0
+}
+const catRank = (item: (typeof WORK)[number]): number =>
+  WORK_CATEGORIES.findIndex((c) => c.id === item.categories[0])
+
+// Assign 6-col grid spans so every row fills exactly, except the last row
+// which may hold a single tile (leaving a gap). Each row is a lead span
+// (4/3/2, cycled for variety) plus one tile filling the remainder. Tile 0 is
+// the intro tile, so it always leads with 4.
+function bentoSpans(n: number, cols = 6): number[] {
+  const leads = [4, 3, 2]
+  const spans: number[] = []
+  let i = 0
+  let row = 0
+  while (i < n) {
+    if (n - i === 1) {
+      spans.push(Math.min(4, cols)) // lone last tile, alone on its row
+      break
+    }
+    const lead = i === 0 ? 4 : leads[row % leads.length]
+    spans.push(lead, cols - lead)
+    i += 2
+    row++
+  }
+  return spans
+}
+
+// True at the 6-col breakpoint, where the computed spans apply. Below that the
+// CSS media queries own the layout (4-col / single-col), so we skip inlining.
+function useWideGrid(): boolean {
+  const [wide, setWide] = useState(
+    () => window.matchMedia('(min-width: 1025px)').matches,
+  )
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1025px)')
+    const on = () => setWide(mq.matches)
+    mq.addEventListener('change', on)
+    return () => mq.removeEventListener('change', on)
+  }, [])
+  return wide
+}
+
+// Read / build the /work URL query (?type=…&p=…) so filters and the open
+// project are shareable and survive back/forward.
+const parseFilter = (): Filter => {
+  const t = new URLSearchParams(window.location.search).get('type')
+  return t && WORK_CATEGORIES.some((c) => c.id === t) ? (t as Filter) : 'all'
+}
+const parseOpen = (): string | null => {
+  const p = new URLSearchParams(window.location.search).get('p')
+  return p && WORK.some((w) => w.id === p) ? p : null
+}
+const buildUrl = (filter: Filter, openId: string | null): string => {
+  const params = new URLSearchParams()
+  if (filter !== 'all') params.set('type', filter)
+  if (openId) params.set('p', openId)
+  const qs = params.toString()
+  // keep the Vite base (e.g. '/PortfolioWebsite/') so deep links resolve
+  return `${import.meta.env.BASE_URL}work${qs ? `?${qs}` : ''}`
+}
 
 function TileIcon({ icon }: { icon: 'flower' | 'rings' }) {
   if (icon === 'rings') {
@@ -33,13 +108,43 @@ export function WorkPage({
   onBack: () => void
   onNavSection: (id: string) => void
 }) {
-  const [filter, setFilter] = useState<WorkCategory | 'all'>('all')
-  const [openId, setOpenId] = useState<string | null>(null)
+  const [filter, setFilter] = useState<Filter>(parseFilter)
+  const [sort, setSort] = useState<Sort>('curated')
+  const [openId, setOpenId] = useState<string | null>(parseOpen)
   const [menuOpen, setMenuOpen] = useState(false)
-  const [scrollY, setScrollY] = useState(0)
-  const [bandFull, setBandFull] = useState(0)
-  const bandRef = useRef<HTMLDivElement>(null)
+  // Velra isn't clickable yet ("more information to come"); a click just shakes.
+  const [nope, setNope] = useState(false)
+  // Phone-only: the filter chips collapse behind a toggle so they don't eat
+  // three rows of vertical space above the grid.
+  const [filtersOpen, setFiltersOpen] = useState(false)
 
+  // Keep state and the URL in sync. Filter is a replace (no history spam); an
+  // opened project is a push so the browser Back closes it. popstate re-reads.
+  const chooseFilter = (f: Filter) => {
+    setFilter(f)
+    setFiltersOpen(false)
+    window.history.replaceState({}, '', buildUrl(f, openId))
+  }
+  const openItem = (id: string) => {
+    if (id === 'velra') {
+      setNope(true)
+      return
+    }
+    setOpenId(id)
+    window.history.pushState({}, '', buildUrl(filter, id))
+  }
+  const closeItem = () => {
+    setOpenId(null)
+    window.history.replaceState({}, '', buildUrl(filter, null))
+  }
+  useEffect(() => {
+    const onPop = () => {
+      setFilter(parseFilter())
+      setOpenId(parseOpen())
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
   // play the entrance once on mount
   const [ready, setReady] = useState(false)
   useEffect(() => {
@@ -47,62 +152,44 @@ export function WorkPage({
     return () => cancelAnimationFrame(id)
   }, [])
 
-  // Track scroll (rAF-throttled) to drive the collapsing band.
-  useEffect(() => {
-    let rafId: number | null = null
-    const onScroll = () => {
-      if (rafId !== null) return
-      rafId = requestAnimationFrame(() => {
-        setScrollY(window.scrollY)
-        rafId = null
-      })
-    }
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => {
-      if (rafId !== null) cancelAnimationFrame(rafId)
-      window.removeEventListener('scroll', onScroll)
-    }
-  }, [])
-
-  // Measure the band's natural (fully-expanded) height. scrollHeight reports
-  // the content extent even while we clamp the box smaller on scroll.
-  useLayoutEffect(() => {
-    const el = bandRef.current
-    if (!el) return
-    const measure = () => setBandFull(el.scrollHeight)
-    measure()
-    const ro = new ResizeObserver(measure)
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [])
-
-  const collapseRange = bandFull ? Math.max(1, bandFull - NAV_HEIGHT) : 1
-  const bandHeight = bandFull ? Math.max(NAV_HEIGHT, bandFull - scrollY) : undefined
-  // Title fades out a touch before the band finishes collapsing.
-  const titleFade = Math.max(0, 1 - scrollY / (collapseRange * 0.8))
-  const compact = scrollY > collapseRange * 0.5
-  // reach full-bleed (bumps-only) right as the band finishes collapsing
-  const scallopExpand = Math.min(80, (scrollY / collapseRange) * 90)
-
-  const items =
+  const filtered =
     filter === 'all' ? WORK : WORK.filter((w) => w.categories.includes(filter))
+  const items =
+    sort === 'curated'
+      ? filtered
+      : [...filtered].sort((a, b) =>
+          sort === 'newest'
+            ? yearKey(b.year) - yearKey(a.year)
+            : catRank(a) - catRank(b),
+        )
+  // The varied tile sizes (is-big/is-featured) are hand-tuned to tile the
+  // 6-col grid only in curated order; for other sorts every tile is uniform.
+  const bento = sort === 'curated'
+  // Dynamic column spans so bento rows always fill (desktop 6-col only). +1 for
+  // the intro tile that leads the grid. Null → fall back to the CSS classes.
+  const wideGrid = useWideGrid()
+  const spans = useMemo(
+    () => (bento && wideGrid ? bentoSpans(items.length + 1) : null),
+    [bento, wideGrid, items.length],
+  )
   const open = openId ? WORK.find((w) => w.id === openId) ?? null : null
   const plate = (id: string) =>
     `N°${String(WORK.findIndex((w) => w.id === id) + 1).padStart(2, '0')}`
+  const catLabels = (cats: readonly WorkCategory[]) =>
+    cats.map((c) => WORK_CATEGORIES.find((wc) => wc.id === c)?.label).join(', ')
+  const filterLabel =
+    filter === 'all'
+      ? 'All'
+      : WORK_CATEGORIES.find((c) => c.id === filter)?.label ?? 'All'
 
   return (
     <main className={`workpage${ready ? ' work-reveal' : ''}`}>
-      {/* Collapsing navy band: nav + title block shrink into a compact
-          scalloped nav as you scroll, like the home top band. */}
+      {/* slim navy nav bar with a scalloped bottom edge */}
       <div
-        ref={bandRef}
-        className={`work-band${compact ? ' compact' : ' expanded'}${
-          menuOpen ? ' menu-open' : ''
-        }`}
-        style={bandHeight !== undefined ? { height: `${bandHeight}px` } : undefined}
+        className={`work-band${menuOpen ? ' menu-open' : ''}`}
+        style={{ height: NAV_HEIGHT }}
       >
-        <ScallopFrame expand={scallopExpand} photoOpacity={0} />
+        <ScallopFrame expand={80} photoOpacity={0} bottomOnly />
         <SiteNav
           isWork
           onNavSection={onNavSection}
@@ -110,43 +197,52 @@ export function WorkPage({
           menuOpen={menuOpen}
           setMenuOpen={setMenuOpen}
         />
-        <div
-          className="work-band-hero"
-          style={{
-            opacity: titleFade,
-            pointerEvents: titleFade < 0.05 ? 'none' : 'auto',
-          }}
-        >
-          <button className="workpage-back" onClick={onBack}>
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M15 5l-7 7 7 7" />
-            </svg>
-            Back
-          </button>
-          <span className="section-eyebrow">the full archive</span>
-          <h1 className="workpage-title">everything I’ve made</h1>
-          <p className="workpage-lead">
-            Apps, code, design, ventures and the things in between — filter by
-            what you’re curious about.
-          </p>
-        </div>
       </div>
       <div
         className="work-band-spacer"
         aria-hidden="true"
-        style={bandFull ? { height: `${bandFull}px` } : undefined}
+        style={{ height: NAV_HEIGHT }}
       />
 
-      {/* filters pin just under the collapsed nav so you can refine while scrolling */}
+      {/* page intro: back control, title and a quick note on the archive */}
+      <header className="archives-head">
+        <div className="archives-head-inner">
+          <button className="archives-back" onClick={onBack}>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M15 5l-7 7 7 7" />
+            </svg>
+            Back to home
+          </button>
+          <h1 className="section-eyebrow archives-eyebrow">the archives</h1>
+        </div>
+      </header>
+
+      {/* filters sit just under the intro so you can refine the grid */}
       <div
         className="work-filters-bar"
         role="group"
         aria-label="Filter work by type"
       >
-        <div className="work-filters">
+        <div className="work-filters-inner">
+        <button
+          className="work-filters-toggle"
+          aria-expanded={filtersOpen}
+          onClick={() => setFiltersOpen((o) => !o)}
+        >
+          <svg
+            className="work-filters-flower"
+            viewBox="0 0 100 100"
+            aria-hidden="true"
+          >
+            <path d={FLOWER_D} fill="currentColor" />
+          </svg>
+          <span className="work-filters-eyebrow">Filter</span>
+          <span className="work-filters-value">{filterLabel}</span>
+        </button>
+        <div className={`work-filters${filtersOpen ? ' is-open' : ''}`}>
           <button
             className={`work-filter${filter === 'all' ? ' is-active' : ''}`}
-            onClick={() => setFilter('all')}
+            onClick={() => chooseFilter('all')}
           >
             All
           </button>
@@ -154,32 +250,83 @@ export function WorkPage({
             <button
               key={c.id}
               className={`work-filter${filter === c.id ? ' is-active' : ''}`}
-              onClick={() => setFilter(c.id)}
+              onClick={() => chooseFilter(c.id)}
             >
               {c.label}
             </button>
           ))}
         </div>
+
+        <div className="work-toolbar">
+          <span className="work-count" aria-live="polite">
+            {items.length} {items.length === 1 ? 'project' : 'projects'}
+          </span>
+          <div
+            className={`work-sort${filtersOpen ? ' is-open' : ''}`}
+            role="group"
+            aria-label="Sort work"
+          >
+            {SORTS.map((s) => (
+              <button
+                key={s.id}
+                className={`work-sort-btn${sort === s.id ? ' is-active' : ''}`}
+                onClick={() => setSort(s.id)}
+                aria-pressed={sort === s.id}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        </div>
       </div>
 
       <div className="workpage-inner">
-        {/* key remounts the grid per filter so the stagger replays */}
-        <div className="work-grid" key={filter}>
+        {/* key remounts the grid per filter/sort so the stagger replays */}
+        <div className="work-grid" key={`${filter}-${sort}`}>
+          {/* intro tile — a quick note on the archive, leads the bento */}
+          <article
+            className="work-tile is-big is-info"
+            style={spans ? { gridColumn: `span ${spans[0]}` } : undefined}
+          >
+            <div className="info-top">
+              <p className="info-greet">
+                <b>Hi :) Happy you are intressted in my work!</b>
+              </p>
+              <p className="info-main">
+                Here you have a <mark>running catalogue</mark> of what I have <mark>designd and buildt</mark>, form products, client/job
+                work, and some experiences i have hade in between. Not everything I have made is here yet, more to come.
+              </p>
+            </div>
+            <p className="info-note"><i>Open any tile to find the full story behind it.</i></p>
+          </article>
           {items.map((item, i) => (
             <article
               key={item.id}
-              className={`work-tile${item.featured ? ' is-featured' : ''}${
-                item.img ? ' has-img' : ''
-              }${item.icon ? ' is-app' : ''}`}
-              style={{ animationDelay: `${Math.min(i, 9) * 0.05}s` }}
+              className={`work-tile${bento && item.featured ? ' is-featured' : ''}${
+                bento && item.big ? ' is-big' : ''
+              }${item.img ? ' has-img' : ''}${item.icon ? ' is-app' : ''}${
+                item.id === 'velra' && nope ? ' work-nope' : ''
+              }`}
+              style={{
+                animationDelay: `${Math.min(i, 9) * 0.05}s`,
+                ...(spans ? { gridColumn: `span ${spans[i + 1]}` } : {}),
+              }}
               role="button"
               tabIndex={0}
-              aria-label={`${item.title} — read more`}
-              onClick={() => setOpenId(item.id)}
+              aria-label={
+                item.id === 'velra'
+                  ? `${item.title}, more information to come`
+                  : `${item.title}, ${catLabels(item.categories)}, read more`
+              }
+              onClick={() => openItem(item.id)}
+              onAnimationEnd={
+                item.id === 'velra' ? () => setNope(false) : undefined
+              }
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault()
-                  setOpenId(item.id)
+                  openItem(item.id)
                 }
               }}
             >
@@ -202,7 +349,15 @@ export function WorkPage({
               <div className="work-tile-main">
                 {item.icon && <span className="work-year">{item.year}</span>}
                 <h3 className="work-title">{item.title}</h3>
-                <p className="work-blurb">{item.blurb}</p>
+                <p className="work-blurb">
+                  {item.blurb}
+                  {item.id === 'velra' && (
+                    <> <strong>More information to come.</strong></>
+                  )}
+                </p>
+                {item.outcome && (
+                  <span className="work-outcome">{item.outcome}</span>
+                )}
                 <ul className="work-cats" aria-hidden="true">
                   {item.categories.map((c) => (
                     <li key={c}>
@@ -213,6 +368,11 @@ export function WorkPage({
               </div>
             </article>
           ))}
+          {items.length === 0 && (
+            <p className="work-empty">
+              Nothing under that filter yet, try another.
+            </p>
+          )}
         </div>
       </div>
 
@@ -220,6 +380,7 @@ export function WorkPage({
         <WorkModal
           year={open.year}
           title={open.title}
+          wrapTitle={open.wrapTitle}
           overview={open.blurb}
           body={open.detail}
           role={open.role}
@@ -227,7 +388,10 @@ export function WorkPage({
           highlights={open.highlights}
           link={open.link}
           img={open.img}
-          onClose={() => setOpenId(null)}
+          gallery={open.gallery}
+          onClose={closeItem}
+          onNavSection={onNavSection}
+          onSeeWork={closeItem}
         />
       )}
     </main>

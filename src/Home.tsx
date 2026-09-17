@@ -18,11 +18,29 @@ const FooterMemo = memo(Footer)
 
 // The scrolling landing page: shrinking top band + the section stack. Lives
 // behind the "/" route so none of its scroll listeners run on the work page.
-export function Home({ onNavigateWork }: { onNavigateWork: () => void }) {
+export function Home({
+  onNavigateWork,
+}: {
+  onNavigateWork: (projectId?: string) => void
+}) {
   const active = useActiveSection(NAV_ITEMS.map((n) => n.id))
   const [vh, setVh] = useState(0)
   const [scrollY, setScrollY] = useState(0)
   const [menuOpen, setMenuOpen] = useState(false)
+  // On phones the band doesn't shrink — it's a full-screen hero that scrolls
+  // away, so nothing resizes on scroll (smooth) and only its scalloped bottom reads.
+  const [isMobile, setIsMobile] = useState(
+    () =>
+      typeof window !== 'undefined' &&
+      window.matchMedia('(max-width: 720px)').matches,
+  )
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 720px)')
+    const onChange = () => setIsMobile(mq.matches)
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
 
   useEffect(() => {
     if (!menuOpen) return
@@ -58,6 +76,9 @@ export function Home({ onNavigateWork }: { onNavigateWork: () => void }) {
   }, [])
 
   useEffect(() => {
+    // Phones scroll with native momentum; a JS snap fights it and feels choppy,
+    // so the snap engine is desktop-only.
+    if (window.matchMedia('(max-width: 720px)').matches) return
     // Only snap when you've come to rest very close to a target (small
     // threshold) and have been still for a beat — so it tidies the framing
     // without grabbing the scroll out from under you.
@@ -113,19 +134,7 @@ export function Home({ onNavigateWork }: { onNavigateWork: () => void }) {
       if (building) {
         candidates.push(building.offsetTop)
       }
-      // Journey (tall band) centres in the viewport — but not when it's the
-      // pinned full timeline, which drives its own horizontal scroll.
-      const journeyCenter = document.getElementById('journey')
-      if (
-        journeyCenter &&
-        !journeyCenter.classList.contains('journey--pinned')
-      ) {
-        candidates.push(
-          journeyCenter.offsetTop +
-            journeyCenter.offsetHeight / 2 -
-            window.innerHeight / 2,
-        )
-      }
+      // (Journey is a tall scroll-through timeline now — no snap target.)
       // About snaps to frame its end with the footer scallop peeking in by the
       // same amount the nav shows at the top.
       const scallop = document.querySelector<HTMLElement>('.footer-scallop')
@@ -166,10 +175,22 @@ export function Home({ onNavigateWork }: { onNavigateWork: () => void }) {
   }, [])
 
   const bandHeight = vh > 0 ? Math.max(NAV_HEIGHT, vh - scrollY) : 0
-  const heroFade = vh > 0 ? Math.max(0, 1 - scrollY / (vh * 0.3)) : 1
-  const photoFade = vh > 0 ? Math.max(0, 1 - scrollY / (vh * 0.55)) : 1
-  const compact = vh > 0 && scrollY > vh * 0.5
-  const scallopExpand = Math.min(80, scrollY * 0.2)
+  // Phone: the band scrolls away rather than resizing, but the photo + hero text
+  // fade together to navy over the first half-viewport of scroll — so everything
+  // dissolves into the pinned navy nav (same navy as the scallop fill) instead
+  // of just sliding off.
+  const mobileFade = vh > 0 ? Math.max(0, 1 - scrollY / (vh * 0.5)) : 1
+  const heroFade = isMobile ? mobileFade : vh > 0 ? Math.max(0, 1 - scrollY / (vh * 0.3)) : 1
+  const photoFade = isMobile ? mobileFade : vh > 0 ? Math.max(0, 1 - scrollY / (vh * 0.55)) : 1
+  const compact = !isMobile && vh > 0 && scrollY > vh * 0.5
+  // mobile only: are we still on the hero (band's navy photo filling the screen)?
+  // drives the menu's open style — fade/darken over the hero vs drop from the nav.
+  const atHero = isMobile && (vh === 0 || scrollY < vh * 0.5)
+  const scallopExpand = isMobile ? 0 : Math.min(80, scrollY * 0.2)
+  // Phone: the pinned nav's navy backdrop + scalloped edge fade in on the same
+  // scroll-linked curve as the hero/photo fade out, so the band dissolving and
+  // the nav appearing read as one motion (not a backdrop popping in early).
+  const navReveal = isMobile ? 1 - mobileFade : 0
 
   const scrollToSection = (id: string) => {
     setMenuOpen(false)
@@ -191,14 +212,21 @@ export function Home({ onNavigateWork }: { onNavigateWork: () => void }) {
   return (
     <main className="page">
       <div
-        className={`top-band ${compact ? 'compact' : 'expanded'}${menuOpen ? ' menu-open' : ''}`}
-        style={vh > 0 ? { height: `${bandHeight}px` } : undefined}
+        className={`top-band ${compact ? 'compact' : 'expanded'}${menuOpen ? ' menu-open' : ''}${atHero ? ' at-hero' : ''}`}
+        style={
+          !isMobile && vh > 0
+            ? { height: `${bandHeight}px` }
+            : isMobile
+              ? ({ '--nav-reveal': navReveal } as React.CSSProperties)
+              : undefined
+        }
       >
         {/* once compact, kill the photo entirely so the collapsed nav is a
             clean, flat navy matching the other sections (no blue-tinted seam) */}
         <ScallopFrame
           expand={scallopExpand}
           photoOpacity={compact ? 0 : photoFade}
+          bottomOnly={isMobile}
         />
         <SiteNav
           active={active}
@@ -212,9 +240,9 @@ export function Home({ onNavigateWork }: { onNavigateWork: () => void }) {
       </div>
       <div className="top-band-spacer" aria-hidden="true" />
 
-      <Building onSeeWork={onNavigateWork} />
+      <Building onSeeWork={onNavigateWork} onContact={() => scrollToSection('contact')} onNavSection={scrollToSection} />
 
-      <Journey />
+      <Journey onSeeWork={onNavigateWork} />
 
       <AboutMemo />
 

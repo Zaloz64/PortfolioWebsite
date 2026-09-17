@@ -1,0 +1,145 @@
+- generic [ref=f17e1]:
+  - main [ref=f17e3]:
+    - generic "Top navigation" [ref=f17e5]:
+      - link "Zoé Opdendries" [ref=f17e6]:
+        - /url: "#home"
+      - generic [ref=f17e10]:
+        - button "Open menu" [ref=f17e11]
+        - button "Everything I’ve made" [ref=f17e16]
+    - generic [ref=f17e21]:
+      - button "Back to home" [ref=f17e22]
+      - heading "the archives" [level=1] [ref=f17e25]
+    - group "Filter work by type" [ref=f17e26]:
+      - generic [ref=f17e27]:
+        - button "Filter All" [ref=f17e28]:
+          - generic [ref=f17e31]: Filter
+          - generic [ref=f17e32]: All
+        - generic [ref=f17e33]: 7 projects
+    - generic [ref=f17e36]:
+      - article [ref=f17e37]:
+        - generic [ref=f17e38]:
+          - paragraph [ref=f17e39]: Hi :) Happy you are intressted in my work!
+          - paragraph [ref=f17e40]:
+            - text: Here you have a
+            - mark [ref=f17e41]: running catalogue
+            - text: of what I have
+            - mark [ref=f17e42]: designd and buildt
+            - text: ", form products, client/job work, and some experiences i have hade in between. Not everything I have made is here yet, more to come."
+        - paragraph [ref=f17e43]: Open any tile to find the full story behind it.
+      - button "Velra, Business, Code & AI, read more" [ref=f17e44]:
+        - generic [ref=f17e45]:
+          - generic [ref=f17e46]: 2025 to now
+          - generic [aria-hidden] [ref=f17e47]: N°01
+        - generic [ref=f17e48]:
+          - heading "Velra" [level=3] [ref=f17e49]
+          - paragraph [ref=f17e50]: Deeptech in the energy market. Building it with a small team out of Gothenburg.
+          - generic [ref=f17e51]: Co-founder · early stage
+          - list [aria-hidden] [ref=f17e52]:
+            - listitem [ref=f17e53]: Business
+            - listitem [ref=f17e54]: Code & AI
+      - button "Digital Friction, Apps, Design, Code & AI, read more" [ref=f17e55]:
+        - generic [ref=f17e56]:
+          - generic [ref=f17e57]: "2025"
+          - generic [aria-hidden] [ref=f17e58]: N°02
+        - generic [ref=f17e59]:
+          - heading "Digital Friction" [level=3] [ref=f17e60]
+          - paragraph [ref=f17e61]: Turns your phone into a dumb phone. App access stays blocked until you finish what you said you would do.
+          - generic [ref=f17e62]: Designed and built solo · on the App Store
+          - list [aria-hidden] [ref=f17e63]:
+            - listitem [ref=f17e64]: Apps
+            - listitem [ref=f17e65]: Design
+            - listitem [ref=f17e66]: Code & AI
+      - button "Flower Power, Apps, Design, Code & AI, read more" [ref=f17e67]:
+        - generic [aria-hidden] [ref=f17e71]: N°03
+        - generic [ref=f17e72]:
+          - generic [ref=f17e73]: Soon
+          - heading "Flower Power" [level=3] [ref=f17e74]
+          - paragraph [ref=f17e75]: A simple plant care app I built because I kept forgetting to water my own plants.
+          - generic [ref=f17e76]: Designed and built solo · core features free
+          - list [aria-hidden] [ref=f17e77]:
+            - listitem [ref=f17e78]: Apps
+            - listitem [ref=f17e79]: Design
+            - listitem [ref=f17e80]: Code & AI
+      - button "LexEnergy, Code & AI, Design, read more" [ref=f17e81]:
+        - generic [ref=f17e82]:
+          - generic [ref=f17e83]: 2024 to 2025
+          - generic [aria-hidden] [ref=f17e84]: N°04
+        - generic [ref=f17e85]:
+          - heading "LexEnergy" [level=3] [ref=f17e86]
+          - paragraph [ref=f17e87]: Frontend for a battery-backed EV charging network that helps chargers work in places where normal grid capacity can be limited.
+          - generic [ref=f17e88]: Sole frontend owner · React, Vite and TypeScript
+          - list [aria-hidden] [ref=f17e89]:
+            - listitem [ref=f17e90]: Code & AI
+            - listitem [ref=f17e91]: Design
+      - button "AI dental diagnosis, Code & AI, read more" [ref=f17e92]:
+        - generic [ref=f17e93]:
+          - generic [ref=f17e94]: "2024"
+          - generic [aria-hidden] [ref=f17e95]: N°05
+        - generic [ref=f17e96]:
+          - heading "AI dental diagnosis" [level=3] [ref=f17e97]
+          - paragraph [ref=f17e98]: "Bachelor thesis: an AI system diagnosing misaligned teeth from clinical imagery."
+          - generic [ref=f17e99]: Bachelor thesis · Chalmers
+          - list [aria-hidden] [ref=f17e100]:
+            - listitem [ref=f17e101]: Code & AI
+      - button "Bridging the Digital Education Gap, Impact, Business, read more" [ref=f17e102]:
+        - generic [ref=f17e103]:
+          - generic [ref=f17e104]: 2023 to 2024
+          - generic [aria-hidden] [ref=f17e105]: N°06
+        - generic [ref=f17e106]:
+          - heading "Bridging the Digital Education Gap" [level=3] [ref=f17e107]
+          - paragraph [ref=f17e108]: Vice Chairman of a Chalmers initiative bringing computers and offline learning tools to schools in KwaZulu-Natal, South Africa.
+          - generic [ref=f17e109]: Funded, planned and set up on site
+          - list [aria-hidden] [ref=f17e110]:
+            - listitem [ref=f17e111]: Impact
+            - listitem [ref=f17e112]: Business
+      - button "EGOI, Code & AI, read more" [ref=f17e113]:
+        - generic [ref=f17e114]:
+          - generic [ref=f17e115]: "2021"
+          - generic [aria-hidden] [ref=f17e116]: N°07
+        - generic [ref=f17e117]:
+          - heading "EGOI" [level=3] [ref=f17e118]
+          - paragraph [ref=f17e119]: Qualified nationally for the European Girls’ Olympiad in Informatics.
+          - list [aria-hidden] [ref=f17e120]:
+            - listitem [ref=f17e121]: Code & AI
+  - dialog "Bridging the Digital Education Gap" [ref=f17e122]:
+    - banner "Top navigation" [ref=f17e124]:
+      - link "Zoé Opdendries" [ref=f17e125]:
+        - /url: "#home"
+      - generic [ref=f17e129]:
+        - button "Open menu" [ref=f17e130]
+        - button "Everything I’ve made" [ref=f17e135]
+    - article [ref=f17e138]:
+      - button "Back to archive" [active] [ref=f17e139]
+      - generic [ref=f17e142]:
+        - generic [ref=f17e143]:
+          - generic [ref=f17e144]:
+            - text: 2023 to 2024
+            - heading "Bridging the Digital Education Gap" [level=1] [ref=f17e145]
+          - paragraph [ref=f17e146]: Vice Chairman of a Chalmers initiative bringing computers and offline learning tools to schools in KwaZulu-Natal, South Africa.
+          - button "See the results" [ref=f17e148]
+          - paragraph [ref=f17e151]: CESA, Computer Education in Southern Africa, is a Chalmers student-run project that sends donated computers to rural schools in South Africa. I was Vice Chairman in 2023 to 2024, working with fundraising, logistics and travelling to KwaZulu-Natal with the team to help set everything up on site. We worked together with Star for Life, who support the schools year round and guided us on the ground.
+          - paragraph [ref=f17e152]: "Each computer was prepared with Ubuntu and offline learning programs before being shipped. Once we arrived, the work became more practical: troubleshooting, maintenance, setup and helping with whatever the schools needed."
+          - paragraph [ref=f17e153]: What stayed with me was how much 15 computers could mean. For the schools, it was not just hardware. It was a way to teach computer education properly and give students a better chance in a world where basic digital skills are expected. Some students reach university on scholarships having barely used a keyboard or mouse before, but are still expected to write assignments and use digital systems from day one. That gap can become the difference between keeping an opportunity and losing it.
+          - paragraph [ref=f17e154]: Seeing the computers arrive caught me off guard. The joy was completely open. I had never been in a room where something I take for granted meant that much to someone else. If you want to support the project, you can donate computers or money by contacting the new board at cesaproject.com.
+          - generic [ref=f17e155]:
+            - heading "Gallery" [level=2] [ref=f17e156]
+            - figure [ref=f17e158]
+        - complementary [ref=f17e159]:
+          - generic [ref=f17e160]:
+            - generic [ref=f17e161]:
+              - term [ref=f17e162]: Role
+              - definition [ref=f17e163]: Vice Chairman
+            - generic [ref=f17e164]:
+              - term [ref=f17e165]: Year
+              - definition [ref=f17e166]: 2023 to 2024
+          - generic [ref=f17e167]:
+            - heading "Highlights" [level=2] [ref=f17e168]
+            - list [ref=f17e169]:
+              - listitem [ref=f17e170]:
+                - generic [ref=f17e173]: Raised funding and planned logistics
+              - listitem [ref=f17e174]:
+                - generic [ref=f17e177]: Helped set up computers on site in KwaZulu-Natal
+              - listitem [ref=f17e178]:
+                - generic [ref=f17e181]: Supported digital access in rural South African schools
+          - link "Visit cesaproject.com" [ref=f17e183]:
+            - /url: https://cesaproject.com

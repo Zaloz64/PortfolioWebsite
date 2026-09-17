@@ -1,49 +1,44 @@
-import { useEffect, useRef, useState } from 'react'
-import { FLOWER_D } from '../lib/svg'
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { WORK } from '../lib/work'
+import { WorkModal } from '../components/WorkModal'
 
 const BUILDING_APPS = [
   {
-    id: 'flower-power',
-    name: 'Flower Power',
-    tag: 'Coming soon',
-    body: 'A watering app that keeps your plants alive — care reminders tuned to what you actually grow.',
+    id: 'velra',
+    name: 'Velra',
+    tag: 'Market validation',
+    body: 'An energy market venture, done through my entrepreneurship master’s and backed by Chalmers and Lund ventures.',
   },
   {
-    id: 'focus-lilio',
-    name: 'Focus Lilio',
-    tag: 'Coming soon',
-    body: 'A focus app that makes deep work the path of least resistance instead of the path of willpower.',
+    id: 'digital-friction',
+    name: 'Digital Friction',
+    tag: 'On the App Store',
+    body: "Turns your phone into a dumb phone. App access stays blocked until you finish what you said you'd do. Frictionless is the problem.",
   },
 ] as const
 
 function AppIcon({ id }: { id: string }) {
-  if (id === 'focus-lilio') {
+  if (id === 'digital-friction') {
     return (
       <svg className="app-icon" viewBox="0 0 100 100" aria-hidden="true">
-        <circle
-          cx="50"
-          cy="50"
-          r="34"
+        <rect
+          x="30"
+          y="14"
+          width="40"
+          height="72"
+          rx="9"
           fill="none"
           stroke="currentColor"
           strokeWidth="7"
         />
-        <circle
-          cx="50"
-          cy="50"
-          r="19"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="7"
-        />
-        <circle cx="50" cy="50" r="6" fill="currentColor" />
+        <line x1="44" y1="74" x2="56" y2="74" stroke="currentColor" strokeWidth="7" strokeLinecap="round" />
       </svg>
     )
   }
-  if (id === 'flower-power') {
+  if (id === 'velra') {
     return (
       <svg className="app-icon" viewBox="0 0 100 100" aria-hidden="true">
-        <path d={FLOWER_D} fill="currentColor" />
+        <path d="M56 8 L26 54 L48 54 L44 92 L74 42 L52 42 Z" fill="currentColor" />
       </svg>
     )
   }
@@ -57,11 +52,36 @@ function AppIcon({ id }: { id: string }) {
   )
 }
 
-export function BuildingSection({ onSeeWork }: { onSeeWork: () => void }) {
-  const [flower, focus] = BUILDING_APPS
+export function BuildingSection({
+  onSeeWork,
+  onContact,
+  onNavSection,
+}: {
+  onSeeWork: () => void
+  onContact: () => void
+  onNavSection?: (id: string) => void
+}) {
+  const [velra, friction] = BUILDING_APPS
   const bentoRef = useRef<HTMLDivElement>(null)
   const [armed, setArmed] = useState(false)
   const [dropped, setDropped] = useState(false)
+  const [openId, setOpenId] = useState<string | null>(null)
+  const [nope, setNope] = useState(false)
+  const openItem = openId ? WORK.find((w) => w.id === openId) ?? null : null
+
+  // Make a tile open the shared detail modal (same pattern as the archive
+  // grid and the journey timeline). Closing returns to this section.
+  const tileProps = (id: string) => ({
+    role: 'button' as const,
+    tabIndex: 0,
+    onClick: () => setOpenId(id),
+    onKeyDown: (e: KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault()
+        setOpenId(id)
+      }
+    },
+  })
 
   // Animate only on wider screens with motion allowed; elsewhere the tiles
   // just render in place.
@@ -110,7 +130,7 @@ export function BuildingSection({ onSeeWork }: { onSeeWork: () => void }) {
           building
         </span>
         <div className="building-head section-heading">
-          <span className="section-eyebrow">in the works</span>
+          <span className="section-eyebrow">things i’m making</span>
           <button
             className="building-archive-link"
             onClick={onSeeWork}
@@ -123,51 +143,79 @@ export function BuildingSection({ onSeeWork }: { onSeeWork: () => void }) {
           </button>
         </div>
         <div className="build-bento" ref={bentoRef}>
-          <article className="bento-tile bento-a">
+          <article className="bento-tile bento-a" {...tileProps(friction.id)}>
             <div className="bento-ghost" aria-hidden="true">
-              <AppIcon id={flower.id} />
+              <AppIcon id={friction.id} />
             </div>
-            <span className="bento-index" aria-hidden="true">
-              N°01
-            </span>
-            <AppIcon id={flower.id} />
+            <AppIcon id={friction.id} />
             <div>
-              <span className="bento-tag">{flower.tag}</span>
-              <h3 className="bento-name">{flower.name}</h3>
-              <p className="bento-note">{flower.body}</p>
+              <span className="bento-tag">{friction.tag}</span>
+              <h3 className="bento-name">{friction.name}</h3>
+              <p className="bento-note">{friction.body}</p>
             </div>
           </article>
-          <article className="bento-tile bento-b">
+          <article
+            className={`bento-tile bento-b${nope ? ' bento-nope' : ''}`}
+            onClick={() => setNope(true)}
+            onAnimationEnd={() => setNope(false)}
+          >
             <div className="bento-ghost" aria-hidden="true">
-              <AppIcon id={focus.id} />
+              <AppIcon id={velra.id} />
             </div>
-            <span className="bento-index" aria-hidden="true">
-              N°02
-            </span>
-            <AppIcon id={focus.id} />
+            <AppIcon id={velra.id} />
             <div>
-              <span className="bento-tag">{focus.tag}</span>
-              <h3 className="bento-name">{focus.name}</h3>
-              <p className="bento-note">{focus.body}</p>
+              <span className="bento-tag">{velra.tag}</span>
+              <h3 className="bento-name">{velra.name}</h3>
+              <p className="bento-note">
+                {velra.body} <strong>More information to come.</strong>
+              </p>
             </div>
           </article>
           <article className="bento-tile bento-c">
-            <span className="bento-index" aria-hidden="true">
-              ✶
-            </span>
             <div>
-              <span className="bento-tag">My philosophy</span>
-              <h3 className="bento-name">Buy it once. Keep it yours.</h3>
+              <span className="bento-tag">Available</span>
+              <h3 className="bento-name">Selected projects</h3>
               <p className="bento-note">
-                I’m tired of paying monthly for things that should just be mine.
-                So you buy my apps once and they’re yours to keep — the only
-                exception being real running costs, like AI, where a small
-                subscription might be needed.
+                Websites and software, designed and built to spec. I take on a
+                few projects a year alongside Velra. Contact me if you have
+                something.
               </p>
             </div>
           </article>
         </div>
+        <button className="building-contact-cta" onClick={onContact}>
+          Need something built? Contact me
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 5v14M5 13l7 7 7-7" />
+          </svg>
+        </button>
       </div>
+
+      {openItem && (
+        <WorkModal
+          year={openItem.year}
+          title={openItem.title}
+          wrapTitle={openItem.wrapTitle}
+          overview={openItem.blurb}
+          body={openItem.detail}
+          role={openItem.role}
+          tags={openItem.tags}
+          highlights={openItem.highlights}
+          link={openItem.link}
+          img={openItem.img}
+          gallery={openItem.gallery}
+          backLabel="Back"
+          onClose={() => setOpenId(null)}
+          onNavSection={(id) => {
+            setOpenId(null)
+            requestAnimationFrame(() => onNavSection?.(id))
+          }}
+          onSeeWork={() => {
+            setOpenId(null)
+            onSeeWork()
+          }}
+        />
+      )}
     </section>
   )
 }

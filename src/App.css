@@ -1,8 +1,6 @@
 /* ---------- Layout ---------- */
 .page {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 32px 0;
+  padding: 0 var(--gutter-x);
 }
 
 @media (max-width: 720px) {
@@ -31,19 +29,37 @@ section {
   clip-path: inset(0 0 -120px 0);
 }
 
-/* The mobile menu hangs below the band, so it needs more bottom overflow. */
+/* The mobile menu is a full-screen overlay — drop the clip so it isn't cropped
+   to the band (clip-path clips descendants, even fixed ones). */
 .top-band.menu-open {
-  clip-path: inset(0 0 -480px 0);
+  clip-path: none;
 }
 
 .top-band-spacer {
-  height: calc(100vh - 96px);
+  height: calc(100dvh - 96px);
   width: 100%;
 }
 
 @media (max-width: 720px) {
+  /* phone: full-screen hero band that scrolls away naturally — no JS shrink,
+     so scrolling stays smooth and only the scalloped bottom edge reads.
+     clip-path is dropped so the pinned nav (fixed, below) isn't clipped away
+     as the band scrolls off; the bottom-only scallop fits inside the band. */
+  .top-band {
+    position: relative;
+    /* break out of .page's 18px side padding so the band fills the viewport
+       width (it no longer does once it's in-flow rather than fixed) */
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    /* dvh: fills the actual visible viewport so the hero always reaches the
+       screen edge (svh left a gap once the address bar hid on scroll).
+       Trimmed by 20px so a sliver of the white page shows under the scallop
+       bumps instead of them sitting flush against the screen edge. */
+    height: calc(100dvh - 20px);
+    clip-path: none;
+  }
   .top-band-spacer {
-    height: calc(100vh - 64px);
+    display: none;
   }
 }
 
@@ -96,7 +112,7 @@ section {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 64px max(40px, calc(50vw - 640px));
+  padding: 64px var(--gutter-x);
   overflow: hidden;
   min-height: 0;
 }
@@ -106,7 +122,7 @@ section {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  max-width: 1100px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
@@ -115,7 +131,9 @@ section {
   /* sits on top of the first "I" of the serif line; em units track font size */
   top: -0.35em;
   left: -0.15em;
-  width: clamp(48px, 6vw, 84px);
+  /* min kept small so it stays over the first "I" on phones instead of
+     bleeding across "make"; the vw/max keep the desktop sticker size */
+  width: clamp(32px, 6vw, 84px);
   height: auto;
   transform: rotate(-10deg);
   filter: drop-shadow(0 6px 14px rgba(13, 19, 82, 0.4));
@@ -175,7 +193,7 @@ section {
 
 .hero-subtitle {
   margin-top: 22px;
-  max-width: 760px;
+  max-width: 920px;
   color: var(--cream);
   font-family: var(--serif);
   font-style: italic;
@@ -355,6 +373,10 @@ section {
   .hero {
     padding: 48px 20px;
   }
+  /* pull the sticker further left so it caps the "I" instead of grazing "make" */
+  .hero-flower {
+    left: -0.5em;
+  }
   .hl-serif {
     font-size: clamp(30px, 10.5vw, 44px);
   }
@@ -411,12 +433,11 @@ section {
   flex-direction: column;
   justify-content: center;
   /* one-screen stage where it fits; grows naturally on short viewports */
-  min-height: 100vh;
+  min-height: 100dvh;
   /* horizontal inset re-creates the .page column the full-bleed gave up;
      top clears the fixed 72px band, bottom kept tight so the bento sits
      centred in the viewport rather than pushed low */
-  padding: clamp(92px, 11vh, 124px) max(32px, calc(50vw - 608px))
-    clamp(40px, 5vh, 64px);
+  padding: clamp(92px, 11vh, 124px) var(--gutter-x) clamp(40px, 5vh, 64px);
   box-sizing: border-box;
   /* clip the parked tiles + the oversized watermark to the section */
   overflow: hidden;
@@ -486,6 +507,45 @@ section {
   transform: translateX(2px);
 }
 
+/* CTA under the bento, nudged to the right — pulls down to the contact form */
+.building-contact-cta {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  margin: 22px 0 0 auto;
+  align-items: center;
+  gap: 9px;
+  background: transparent;
+  border: none;
+  padding: 4px 0;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bg);
+  transition: gap 0.2s ease, color 0.2s ease;
+}
+
+.building-contact-cta svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.2s ease;
+}
+
+.building-contact-cta:hover {
+  color: var(--ink);
+}
+
+.building-contact-cta:hover svg {
+  transform: translateY(3px);
+}
+
 /* huge ghosted word behind the blocks — stays put, like journey's watermark */
 .building-watermark {
   position: absolute;
@@ -532,6 +592,30 @@ section {
 }
 .building--armed.is-dropped .bento-a {
   animation: tileDrop 1.05s linear 0.32s both;
+}
+
+/* the section head + contact CTA sit hidden until the tiles have
+   finished falling (~1.37s), then ease up into place */
+.building--armed .building-head,
+.building--armed .building-contact-cta {
+  opacity: 0;
+}
+.building--armed.is-dropped .building-head {
+  animation: buildingRise 0.6s ease 1.4s both;
+}
+.building--armed.is-dropped .building-contact-cta {
+  animation: buildingRise 0.6s ease 1.55s both;
+}
+
+@keyframes buildingRise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* gravity: accelerate down, land, then a couple of small settling bounces */
@@ -613,6 +697,16 @@ section {
   box-shadow: 12px 12px 0 var(--ink);
 }
 
+/* "nope" nudge: Velra isn't clickable, so a click just shakes the tile */
+.bento-nope {
+  animation: bento-nope 0.25s ease;
+}
+@keyframes bento-nope {
+  0%, 100% { translate: 0 0; }
+  25% { translate: -2px 0; }
+  75% { translate: 2px 0; }
+}
+
 .bento-a {
   background: var(--bg);
   color: var(--cream);
@@ -620,10 +714,13 @@ section {
 .bento-b {
   background: var(--ink);
   color: var(--cream);
-  /* tall tile: cluster icon + copy in the middle instead of pinning the
-     copy to the bottom with a dead void above it */
-  justify-content: center;
-  gap: clamp(20px, 3vh, 36px);
+  /* icon up top, copy pinned to the bottom — matches the Flower Power tile */
+  justify-content: space-between;
+}
+/* Velra isn't clickable, so it shouldn't lift on hover */
+.bento-b:hover {
+  translate: 0 0;
+  box-shadow: 8px 8px 0 var(--ink);
 }
 .bento-c {
   background: var(--cream);
@@ -657,10 +754,10 @@ section {
 /* oversized icon echo bleeding off the corner */
 .bento-ghost {
   position: absolute;
-  right: -10%;
-  bottom: -30%;
+  right: -5%;
+  bottom: -10%;
   width: 50%;
-  opacity: 0.1;
+  opacity: 0.22;
   transform: rotate(-12deg);
   pointer-events: none;
   z-index: 0;
@@ -669,22 +766,6 @@ section {
 .bento-ghost .app-icon {
   width: 100%;
   opacity: 1;
-}
-
-/* serif-italic plate number, like a print edition mark */
-.bento-index {
-  position: absolute;
-  top: clamp(18px, 2.2vw, 28px);
-  right: clamp(20px, 2.6vw, 32px);
-  z-index: 1;
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: clamp(18px, 1.8vw, 26px);
-  color: var(--squiggle);
-}
-
-.bento-c .bento-index {
-  color: var(--bg);
 }
 
 .bento-tag {
@@ -721,7 +802,7 @@ section {
   font-size: clamp(14px, 0.5vw + 0.8vh, 19px);
   line-height: 1.5;
   color: rgba(13, 19, 82, 0.7);
-  max-width: 44ch;
+  max-width: 70%;
 }
 
 /* notes on the dark tiles need light text */
@@ -758,8 +839,7 @@ section {
     padding-bottom: 64px;
   }
   .building-watermark {
-    font-size: clamp(72px, 30vw, 200px);
-    top: 16%;
+    display: none;
   }
   .building-head {
     margin-bottom: 28px;
@@ -774,6 +854,9 @@ section {
   .bento-b {
     min-height: 220px;
   }
+  .bento-note {
+    max-width: 100%;
+  }
   .bento-tile {
     box-shadow: 5px 5px 0 var(--ink);
   }
@@ -783,311 +866,354 @@ section {
   }
 }
 
-/* ---------- Journey (vertical dashed-line timeline) ---------- */
+/* mobile has no parked drop, so fade + rise each tile in as the section
+   scrolls into view (the IO toggles .is-dropped regardless of `armed`) */
+@media (max-width: 860px) and (prefers-reduced-motion: no-preference) {
+  .bento-tile {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+  .building.is-dropped .bento-a {
+    animation: tileRise 0.55s ease 0s both;
+  }
+  .building.is-dropped .bento-b {
+    animation: tileRise 0.55s ease 0.12s both;
+  }
+  .building.is-dropped .bento-c {
+    animation: tileRise 0.55s ease 0.24s both;
+  }
+}
+
+@keyframes tileRise {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- Journey: vertical scroll-accordion ----------
+   A sticky "Journey" title on the left, the milestones stacked on the right.
+   The row nearest the viewport centre is "open" (year + title stay visible,
+   body/photo/tags expand below it); JS in Journey.tsx drives `.is-open` from
+   scroll position. No pin, no horizontal track. */
 .journey {
   position: relative;
-  /* small top gap into the navy band (was 100px — too big a white void
-     under the building section) */
-  margin: 40px calc(50% - 50vw) 0;
+  margin: 0 calc(50% - 50vw);
   background: var(--ink);
   color: var(--cream);
-  /* clip (not hidden — that would break the pinned sticky) so the oversized
-     watermark can't widen the document */
   overflow-x: clip;
 }
 
-/* hollow outlined word behind the cards, same system as Building's watermark */
-.journey .section-eyebrow,
-.journey .section-title {
-  color: var(--cream);
+.journey .section-eyebrow {
+  color: var(--squiggle);
 }
 
-/* heading — shown on mobile only (desktop puts it in the portrait caption) */
-.journey-head {
-  text-align: center;
-  padding: clamp(56px, 9vh, 96px) 0 clamp(28px, 4vh, 44px);
+.journey-inner {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(340px, 1.25fr) minmax(0, 1.2fr);
+  gap: clamp(32px, 6vw, 96px);
+  align-items: start;
+  /* same content width / gutters as the building section */
+  padding: clamp(56px, 10vh, 120px) var(--gutter-x);
+  box-sizing: border-box;
+}
+
+/* left column — sticks while the list scrolls past */
+.journey-aside {
+  position: sticky;
+  top: clamp(80px, 18vh, 160px);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
   opacity: 0;
   transform: translateY(28px);
   transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
     transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
 }
-
-.journey-reveal .journey-head {
+.journey-reveal .journey-aside {
   opacity: 1;
   transform: none;
 }
 
-/* ---------- Journey: pinned story — sticky portrait + scrolling timeline ----------
-   On desktop the section is inflated (height set in JS to viewport + the rail's
-   overflow). `.journey-pin` sticks to the viewport so the page feels still while
-   the timeline rail (translateY in JS) scrolls past the left portrait, which
-   crossfades per era. Mobile falls back to a normal single-column timeline. */
-.journey-pin {
-  position: relative;
+/* collapsed (default) view: pin the portrait to the bottom of the viewport
+   while the milestone list scrolls past, instead of sticking to the top */
+.journey--collapsed .journey-aside {
+  top: auto;
+  bottom: 0;
 }
 
-/* the big side portrait — a background-free cutout that floats on the navy
-   (desktop only). Bottom-anchored so the figure "stands" in the column. */
-.journey-portrait {
-  display: none;
-  position: relative;
+/* head and list ease up into place when the section scrolls in, staggered
+   behind the aside so the block assembles top-to-bottom (watermark handled
+   in its own rule below to preserve its centring transform) */
+.journey-head,
+.journey-list {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.journey-reveal .journey-head {
+  opacity: 1;
+  transform: none;
+  transition-delay: 0.05s;
+}
+.journey-reveal .journey-list {
+  opacity: 1;
+  transform: none;
+  transition-delay: 0.28s;
 }
 
-.journey-portrait-img {
-  display: block;
+@media (prefers-reduced-motion: reduce) {
+  .journey-head,
+  .journey-list {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* faint ghosted "Highlights" behind the content — same treatment as the
+   building section's watermark, dialled down for the dark background */
+.journey-watermark {
+  position: absolute;
+  /* span the full content width and centre via text-align, so it reads as a
+     label across the whole section rather than anchored to one column */
+  left: 0;
+  right: 0;
+  /* sits just below the "My journey" head row */
+  top: clamp(140px, 22vh, 260px);
+  text-align: center;
+  z-index: 0;
+  font-family: var(--display);
+  /* big, but with clear whitespace on both sides ("Highlights" is long) */
+  font-size: clamp(88px, 19vw, 300px);
+  line-height: 0.8;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.08);
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  /* fades up with the rest of the section */
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: 0.18s;
+}
+.journey-reveal .journey-watermark {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .journey-watermark {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* expanded "full timeline" (not pinned, not collapsed): the section is a tall
+   natural scroll, so pin the watermark to the viewport while you scroll the
+   eras. It spans both columns and stays centred over the whole section;
+   height:0 keeps it out of the grid flow so it sits behind the list and
+   releases when the section ends. */
+.journey:not(.journey--pinned):not(.journey--collapsed) .journey-watermark {
+  position: sticky;
+  top: clamp(96px, 16vh, 180px);
+  grid-column: 1 / -1;
+  align-self: start;
+  height: 0;
+  overflow: visible;
+}
+
+/* eyebrow on the left, "see full timeline" link on the right — mirrors
+   the building section's head row */
+.journey-head {
+  grid-column: 1 / -1;
+}
+.journey-head.section-heading {
+  position: relative;
+  z-index: 1;
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+}
+
+.journey-archive-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  background: transparent;
+  border: none;
+  padding: 4px 0;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cream);
+  cursor: pointer;
+  transition: gap 0.2s ease, color 0.2s ease;
+}
+.journey-archive-link svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.2s ease;
+}
+.journey-archive-link:hover {
+  gap: 13px;
+  color: var(--squiggle);
+}
+.journey-archive-link:hover svg {
+  transform: translateX(2px);
+}
+
+/* media panel — shows the active milestone's photo, swapping as you scroll */
+.journey-media {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 660px;
+  aspect-ratio: 3 / 4;
+  /* tall enough that, pinned to the bottom, its top reaches the watermark */
+  max-height: 88vh;
+  margin-top: auto;
+  overflow: hidden;
+}
+.journey-media-img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  object-position: bottom center;
-  /* a soft shadow under the cutout reads as a real standing figure; a duotone
-     keeps a true rectangular photo from clashing until a PNG is dropped in */
-  filter: drop-shadow(0 24px 40px rgba(7, 11, 51, 0.55));
+  object-fit: cover;
+  object-position: center top;
+  filter: grayscale(0.12) contrast(1.03);
 }
 
-/* a small caption that tracks the centred milestone */
-.journey-portrait-cap {
-  position: absolute;
-  z-index: 2;
-  left: 8px;
-  bottom: clamp(20px, 5vh, 56px);
+/* the list of milestones */
+.journey-list {
+  position: relative;
+  z-index: 1;
+  list-style: none;
+  margin: 0;
+  /* drop the list lower so it sits toward the bottom */
+  padding: clamp(80px, 22vh, 240px) 0 0;
+}
+
+/* one milestone row. min-height gives each row a slice of scroll so the sticky
+   aside has room to pin while the open card moves down the list */
+.jitem {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: clamp(16px, 2vw, 28px);
+  min-height: 18vh;
+  padding: clamp(10px, 1.4vh, 16px) 0;
+}
+
+/* the big index number sitting beside the rail */
+.jitem-num {
+  font-family: var(--display);
+  font-size: clamp(15px, 1vw + 0.5vh, 21px);
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: var(--squiggle);
+  opacity: 0.4;
+  transition: opacity 0.4s ease;
+}
+.jitem.is-open .jitem-num {
+  opacity: 1;
+}
+
+.jitem-body-col {
+  min-width: 0;
+}
+
+.jitem-head {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 14px 18px;
-  background: rgba(7, 11, 51, 0.55);
-  backdrop-filter: blur(4px);
-  border-radius: 14px;
 }
 
-.journey-cap-year {
+.jitem-year {
   font-family: var(--serif);
   font-style: italic;
-  font-size: clamp(20px, 2vw, 28px);
+  font-size: clamp(15px, 1.4vw, 20px);
   color: var(--squiggle);
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 0.4s ease, max-height 0.4s ease;
+}
+.jitem.is-open .jitem-year {
+  opacity: 0.9;
+  max-height: 2em;
 }
 
-.journey-cap-title {
+/* match the Building bento name style */
+.jitem-title {
+  margin: 0;
   font-family: var(--display);
-  font-size: clamp(24px, 2.6vw, 38px);
-  line-height: 1;
-  letter-spacing: 0.01em;
+  font-size: clamp(26px, 1.8vw + 1.6vh, 52px);
+  line-height: 0.95;
   text-transform: uppercase;
   color: var(--cream);
+  opacity: 0.5;
+  transition: opacity 0.4s ease;
 }
-
-/* the timeline rail viewport */
-.jtl-viewport {
-  position: relative;
-}
-
-/* ---------- the timeline: central dashed line, photo + year + note, alternating ---------- */
-.jtl {
-  position: relative;
-  list-style: none;
-  margin: 0 auto;
-  padding: 0;
-  width: 100%;
-  max-width: 760px;
-}
-
-/* the dashed line straight down the middle */
-.jtl::before {
-  content: '';
-  position: absolute;
-  top: 12px;
-  bottom: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  border-left: 2px dashed rgba(169, 184, 255, 0.55);
-}
-
-.jtl-item {
-  position: relative;
-  width: 50%;
-  box-sizing: border-box;
-  padding: clamp(26px, 4vh, 56px) clamp(28px, 3vw, 46px);
-}
-
-/* alternate sides of the line */
-.jtl-item:nth-child(odd) {
-  left: 0;
-  text-align: right;
-}
-
-.jtl-item:nth-child(even) {
-  left: 50%;
-  text-align: left;
-}
-
-/* the node dot on the line, with a short dashed connector to the entry */
-.jtl-dot {
-  position: absolute;
-  top: clamp(32px, 4.6vh, 64px);
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
-  background: var(--squiggle);
-  box-shadow: 0 0 0 5px var(--ink);
-  z-index: 1;
-}
-
-.jtl-item:nth-child(odd) .jtl-dot {
-  right: -6px;
-}
-
-.jtl-item:nth-child(even) .jtl-dot {
-  left: -6px;
-}
-
-/* a faint dashed tick bridging the dot and the entry */
-.jtl-dot::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  width: clamp(20px, 2.4vw, 38px);
-  border-top: 2px dashed rgba(169, 184, 255, 0.55);
-}
-
-.jtl-item:nth-child(odd) .jtl-dot::before {
-  right: 13px;
-}
-
-.jtl-item:nth-child(even) .jtl-dot::before {
-  left: 13px;
-}
-
-/* a flower blooms over the dot of the currently-centred entry */
-.jtl-flower {
-  position: absolute;
-  top: clamp(32px, 4.6vh, 64px);
-  margin-top: -13px;
-  width: 40px;
-  height: 40px;
-  z-index: 2;
-  opacity: 0;
-  transform: scale(0.3) rotate(-28deg);
-  transform-origin: center;
-  transition: opacity 0.3s ease,
-    transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
-  filter: drop-shadow(0 3px 7px rgba(7, 11, 51, 0.5));
-  pointer-events: none;
-}
-
-.jtl-item:nth-child(odd) .jtl-flower {
-  right: -20px;
-}
-
-.jtl-item:nth-child(even) .jtl-flower {
-  left: -20px;
-}
-
-.jtl-flower svg {
-  width: 100%;
-  height: 100%;
-}
-
-.jtl-flower-petals {
-  fill: var(--squiggle);
-}
-
-.jtl-flower-center {
-  fill: var(--cream);
-}
-
-.jtl-item.is-current .jtl-flower {
+.jitem.is-open .jitem-title {
   opacity: 1;
-  transform: scale(1) rotate(-8deg);
 }
 
-/* the flower takes over from the plain dot on the current entry */
-.jtl-item.is-current .jtl-dot {
+/* the collapsible body: grid-rows 0fr→1fr gives a smooth auto-height open */
+.jitem-detail {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.jitem.is-open .jitem-detail {
+  grid-template-rows: 1fr;
+}
+.jitem-detail-inner {
+  overflow: hidden;
   opacity: 0;
+  transition: opacity 0.4s ease 0.05s;
+}
+.jitem.is-open .jitem-detail-inner {
+  opacity: 1;
 }
 
-.jtl-entry {
-  display: inline-flex;
-  flex-direction: column;
-  max-width: 320px;
-}
-
-.jtl-item:nth-child(odd) .jtl-entry {
-  align-items: flex-end;
-}
-
-/* the photo — a plain print with a thin white edge + drop shadow */
-.jtl-photo {
-  display: block;
-  width: 100%;
-  max-width: 260px;
-  height: clamp(150px, 16vw, 200px);
-  margin-bottom: clamp(14px, 1.6vw, 20px);
-  object-fit: cover;
-  object-position: center 28%;
-  border: 5px solid #fff;
-  box-shadow: 0 14px 26px rgba(7, 11, 51, 0.45);
-  filter: grayscale(0.25) contrast(1.03);
-  transition: filter 0.4s ease, transform 0.4s ease;
-}
-
-.jtl-item.is-clickable:hover .jtl-photo,
-.jtl-item.is-clickable:focus-visible .jtl-photo {
-  filter: grayscale(0);
-  transform: scale(1.03);
-}
-
-.jtl-item.is-clickable {
-  cursor: pointer;
-}
-
-.jtl-item.is-clickable:focus-visible {
-  outline: none;
-}
-
-.jtl-year {
-  font-family: var(--sans);
-  font-weight: 700;
-  font-size: clamp(18px, 1.7vw, 24px);
+.jitem-body {
+  margin: 14px 0 0;
+  max-width: 560px;
+  font-size: clamp(14px, 1.05vw, 16px);
+  line-height: 1.6;
   color: var(--cream);
+  opacity: 0.85;
 }
 
-.jtl-title {
-  margin: 4px 0 0;
-  font-family: var(--display);
-  font-size: clamp(22px, 2.2vw, 34px);
-  line-height: 1.04;
-  letter-spacing: 0.01em;
-  text-transform: uppercase;
-  color: var(--squiggle);
-  transition: color 0.3s ease;
-}
-
-.jtl-item.is-clickable:hover .jtl-title,
-.jtl-item.is-clickable:focus-visible .jtl-title {
-  color: var(--cream);
-}
-
-.jtl-body {
-  margin: 10px 0 0;
-  font-size: clamp(14px, 1.1vw, 16px);
-  line-height: 1.55;
-  color: var(--cream);
-  opacity: 0.82;
-}
-
-.jtl-tags {
+.jitem-tags {
   list-style: none;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   padding: 0;
-  margin: 16px 0 0;
+  margin: 14px 0 0;
 }
-
-.jtl-item:nth-child(odd) .jtl-tags {
-  justify-content: flex-end;
-}
-
-.jtl-tags li {
+.jitem-tags li {
   padding: 4px 12px;
   border-radius: 999px;
   border: 1.5px dashed rgba(255, 255, 255, 0.4);
@@ -1099,127 +1225,154 @@ section {
   color: var(--cream);
 }
 
-.jtl-more {
-  display: inline-block;
-  margin-top: 14px;
+.jitem-more {
+  margin-top: 16px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
   font-family: var(--sans);
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--squiggle);
-  opacity: 0;
-  transform: translateY(4px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: opacity 0.2s ease;
+}
+.jitem-more:hover,
+.jitem-more:focus-visible {
+  opacity: 0.7;
 }
 
-.jtl-item.is-clickable:hover .jtl-more,
-.jtl-item.is-clickable:focus-visible .jtl-more {
-  opacity: 1;
-  transform: translateY(0);
+/* ---------- pinned: hold the block in the viewport, cycle the eras ----------
+   The section height is inflated in JS; the inner block sticks to the viewport
+   for that whole range while scroll progress drives which milestone is open, so
+   the first and last eras each get held in the blue instead of scrolling off. */
+.journey--pinned .journey-inner {
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  min-height: 0;
+  /* head row at the top, photo + list fill the rest. minmax(0,1fr) keeps the
+     content row a fixed height so the bottom-pinned photo never shifts when a
+     taller milestone opens */
+  grid-template-rows: auto minmax(0, 1fr);
+  align-items: stretch;
+  padding-top: clamp(90px, 15vh, 180px);
+  padding-bottom: 0;
+}
+/* stretch the aside the full pinned height and make it a positioning context,
+   so the photo can pin to the bottom */
+.journey--pinned .journey-aside {
+  position: relative;
+  top: auto;
+  align-self: stretch;
+  height: 100%;
+}
+.journey--pinned .journey-media {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  margin: 0;
+}
+/* compact rows so the whole list fits the pinned viewport (no internal scroll) */
+.journey--pinned .jitem {
+  min-height: 0;
+}
+/* less top padding here — the content row is height-capped now */
+.journey--pinned .journey-list {
+  padding-top: clamp(24px, 7vh, 90px);
 }
 
-/* ---------- desktop: two-column pinned layout ---------- */
-@media (min-width: 861px) {
-  .journey-head--mobile {
-    display: none;
-  }
-
-  .journey-pin {
-    display: grid;
-    grid-template-columns: 44% 56%;
-    align-items: stretch;
-    gap: clamp(28px, 4vw, 72px);
-    padding: 0 max(40px, calc(50vw - 660px));
-  }
-
-  .journey-portrait {
-    display: flex;
-    flex-direction: column;
-    padding: calc(72px + clamp(16px, 3vh, 36px)) 0 clamp(16px, 3vh, 36px);
-  }
-
-  /* the cutout fills the column height and stands on the bottom */
-  .journey-portrait-img {
-    flex: 1;
-    min-height: 0;
-  }
-
-  /* pinned: stick the portrait to the viewport, clip the scrolling rail */
-  .journey--pinned .journey-pin {
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    overflow: hidden;
-  }
-
-  .journey--pinned .jtl-viewport {
-    height: 100vh;
-    overflow: hidden;
-  }
-
-  /* room so the first + last entries can reach the vertical centre */
-  .journey--pinned .jtl {
-    padding-block: 42vh;
-    will-change: transform;
-  }
+/* wrapper around the list — transparent except in the windowed full timeline */
+.journey-list-window {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
 }
 
-/* ---------- mobile / reduced-motion: single-column, line on the left ---------- */
+/* ---------- full timeline: windowed, sliding list ----------
+   The list is clipped to its column and translated (in JS) so the eras pump
+   up — the top one leaves and the next comes in from below as you scroll.
+   Rows keep the highlights' top padding so 1·2·3 start in the same spot. */
+.journey--windowed .journey-list-window {
+  align-self: stretch;
+  height: 100%;
+  overflow: hidden;
+  /* fade the top/bottom so only the central ~three eras read at once */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 22%,
+    #000 74%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 22%,
+    #000 74%,
+    transparent 100%
+  );
+}
+.journey--windowed .journey-list {
+  /* translateY (set inline) tracks scroll directly — only the reveal opacity
+     transitions; transform must NOT (the base .journey-list rule animates it
+     over 0.7s, which would lag the slide far behind the scroll) */
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+/* uniform closed-row height so the per-row slide step is exact and the list
+   windows through every era (open era expands past this, pushing faded rows) */
+.journey--windowed .jitem {
+  min-height: 16vh;
+}
+
+/* ---------- mobile: stack the title above the list ---------- */
 @media (max-width: 860px) {
-  .journey-portrait {
+  /* watermark is a desktop-only flourish */
+  .journey-watermark {
     display: none;
   }
-  .jtl {
-    width: min(560px, 100%);
-    margin: 0 auto;
-    padding-bottom: clamp(40px, 8vh, 90px);
+  /* keep the section at least a full phone screen tall so the bottom-pinned
+     portrait (absolute to .journey-inner) reaches the foot of the viewport */
+  .journey-inner {
+    /* svh keeps the bottom-pinned portrait steady as the URL bar shows/hides */
+    min-height: 100svh;
+    grid-template-columns: 1fr;
+    gap: clamp(28px, 6vh, 48px);
   }
-  .jtl::before {
-    left: 9px;
-    transform: none;
+  .journey-aside {
+    position: static;
+    top: auto;
   }
-  .jtl-item,
-  .jtl-item:nth-child(odd),
-  .jtl-item:nth-child(even) {
-    width: 100%;
-    left: 0;
-    text-align: left;
-    padding: clamp(20px, 4vh, 36px) 0 clamp(20px, 4vh, 36px) 44px;
+  .journey-list {
+    padding-top: 0;
   }
-  .jtl-item:nth-child(odd) .jtl-dot,
-  .jtl-item:nth-child(even) .jtl-dot {
-    left: 3px;
-    right: auto;
-  }
-  .jtl-item:nth-child(odd) .jtl-dot::before,
-  .jtl-item:nth-child(even) .jtl-dot::before {
-    left: 13px;
-    right: auto;
-  }
-  .jtl-item:nth-child(odd) .jtl-entry {
-    align-items: flex-start;
-  }
-  .jtl-item:nth-child(odd) .jtl-tags {
-    justify-content: flex-start;
-  }
-  .jtl-entry {
-    max-width: 100%;
+  .jitem-detail-inner {
+    padding-left: 0;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .journey-head {
+  .journey-aside {
     opacity: 1;
     transform: none;
+    transition: none;
+  }
+  .jitem-flower,
+  .jitem-title,
+  .jitem-detail,
+  .jitem-detail-inner {
     transition: none;
   }
 }
 
 
-/* Milestone / work detail modal (shared WorkModal) */
-/* full-screen takeover that reads like its own page, not a popup. The whole
-   layer scrolls; a sticky bar keeps the back button + flower mark in reach. */
+
+/* Milestone / work detail (shared WorkModal) */
+/* full-screen takeover that reads like its own light page: navy SiteNav strip,
+   a big title header, then a sticky facts sidebar beside the story + gallery. */
 .workdetail {
   position: fixed;
   inset: 0;
@@ -1227,12 +1380,14 @@ section {
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  background: radial-gradient(
-    130% 80% at 50% 0%,
-    var(--ink-soft) 0%,
-    var(--ink) 52%,
-    var(--ink-deep) 100%
+  color: var(--ink);
+  background-color: var(--cream);
+  /* blueprint dot-grid, same motif as the light sections */
+  background-image: radial-gradient(
+    rgba(13, 19, 82, 0.08) 1.1px,
+    transparent 1.3px
   );
+  background-size: 26px 26px;
   animation: workdetailFade 0.3s ease both;
 }
 
@@ -1240,187 +1395,310 @@ section {
   animation: workdetailFadeOut 0.26s ease both;
 }
 
+/* navy nav strip with a scalloped bottom edge — mirrors the Work page band.
+   No solid background: the ScallopFrame paints the navy + the scallop. */
+.workdetail-nav {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  height: 72px;
+  color: var(--cream);
+}
+.workdetail-nav .topnav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  padding: 12px var(--gutter-x);
+  justify-content: flex-start;
+}
+.workdetail-nav .topnav-logo {
+  font-size: 18px;
+}
+.workdetail-nav .topnav-right {
+  margin-left: auto;
+}
+
 .workdetail-page {
   position: relative;
-  width: min(900px, 100%);
-  margin: 0 auto;
-  min-height: 100vh;
-  padding: 0 clamp(22px, 6vw, 72px) clamp(64px, 9vh, 120px);
+  padding: clamp(32px, 5vh, 56px) var(--gutter-x) clamp(64px, 10vh, 120px);
   animation: workdetailRise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* sticky top bar — back + flower mark stay reachable while the page scrolls */
-.workdetail-bar {
-  position: sticky;
-  top: 0;
-  z-index: 3;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: clamp(18px, 3vh, 30px) 0 16px;
-  background: linear-gradient(180deg, var(--ink) 58%, transparent);
-}
-
+/* back-to-archive pill, above the title (ink, on the light page) */
 .workdetail-back {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
-  padding: 10px 20px 10px 15px;
-  border: 2px solid var(--squiggle);
+  gap: 8px;
+  padding: 9px 18px 9px 13px;
+  border: 2px solid var(--ink);
   border-radius: 999px;
   background: transparent;
-  color: var(--cream);
+  color: var(--ink);
   font-family: var(--sans);
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.03em;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease, transform 0.18s ease;
+  transition: background 0.2s ease, color 0.2s ease, translate 0.15s ease;
 }
 
 .workdetail-back svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   fill: none;
   stroke: currentColor;
-  stroke-width: 2.2;
+  stroke-width: 2.4;
   stroke-linecap: round;
   stroke-linejoin: round;
+  transition: transform 0.2s ease;
 }
 
 .workdetail-back:hover {
-  background: var(--squiggle);
-  color: var(--ink-deep);
+  background: var(--ink);
+  color: var(--cream);
+  translate: -2px 0;
+}
+.workdetail-back:hover svg {
   transform: translateX(-2px);
 }
 
-.workdetail-mark {
-  flex: 0 0 auto;
-  width: 46px;
-  height: 46px;
-  transform: rotate(-10deg);
-}
-
-.workdetail-mark-petals {
-  fill: var(--squiggle);
-}
-
-.workdetail-mark-center {
-  fill: var(--cream);
-}
-
-/* image banner across the top of the page */
-.workdetail-hero {
-  position: relative;
-  margin-top: 6px;
-  border-radius: 24px;
-  overflow: hidden;
-  border: 2px solid var(--squiggle);
-  box-shadow: 0 26px 60px rgba(7, 11, 51, 0.5);
-}
-
-.workdetail-img {
-  width: 100%;
-  height: clamp(220px, 42vh, 420px);
-  object-fit: cover;
-  object-position: center 30%;
-  display: block;
-}
-
-.workdetail-hero::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(13, 19, 82, 0) 50%,
-    rgba(7, 11, 51, 0.5) 100%
-  );
-  pointer-events: none;
-}
-
-.workdetail-intro {
-  margin-top: clamp(34px, 6vh, 60px);
+.workdetail-header {
+  margin: 0;
 }
 
 .workdetail-year {
   font-family: var(--serif);
   font-style: italic;
   font-size: clamp(20px, 2.2vw, 30px);
-  color: var(--squiggle);
+  color: var(--bg);
 }
 
 .workdetail-title {
-  margin: 10px 0 0;
+  margin: 8px 0 0;
   font-family: var(--display);
-  font-size: clamp(42px, 8vw, 96px);
-  line-height: 0.94;
+  font-size: clamp(46px, 8vw, 108px);
+  line-height: 0.92;
   letter-spacing: 0.01em;
   text-transform: uppercase;
-  color: var(--cream);
+  color: var(--ink);
+  /* kept on a single line; JS shrinks the size to fit (see WorkModal) */
+  white-space: nowrap;
 }
 
+/* opt-out: let long titles wrap, but cap at two rows at a smaller size */
+.workdetail-title.is-wrap {
+  white-space: normal;
+  font-size: clamp(34px, 5vw, 64px);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+/* lead now opens the story column, above the body copy */
 .workdetail-lead {
-  margin: clamp(18px, 3vh, 28px) 0 0;
-  max-width: 40ch;
+  margin: 0;
+  max-width: 38ch;
   font-family: var(--serif);
-  font-size: clamp(20px, 2.4vw, 30px);
-  line-height: 1.4;
-  color: var(--cream);
+  font-size: clamp(20px, 2.4vw, 32px);
+  line-height: 1.35;
+  color: var(--ink);
 }
 
-/* labelled meta strip — role / year / stack, case-study style */
-.workdetail-meta {
+/* two-column body: the story (incl. title) on the left, so the sticky facts
+   sidebar on the right top-aligns with the title */
+.workdetail-grid {
+  margin-top: clamp(20px, 3vh, 32px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 27%, 340px);
+  gap: clamp(28px, 4vw, 72px);
+  align-items: start;
+}
+
+/* sticky column: cards start aligned with the top of the story, then follow
+   down as the story scrolls */
+.workdetail-aside {
+  position: sticky;
+  top: clamp(20px, 3vh, 32px);
+  align-self: start;
   display: flex;
-  flex-wrap: wrap;
-  gap: clamp(22px, 5vw, 64px);
-  margin: clamp(30px, 5vh, 48px) 0 0;
-  padding: clamp(20px, 3vh, 28px) 0;
-  border-top: 1.5px solid rgba(169, 184, 255, 0.28);
-  border-bottom: 1.5px solid rgba(169, 184, 255, 0.28);
+  flex-direction: column;
+  gap: clamp(18px, 3vh, 24px);
 }
 
-.workdetail-meta-cell dt {
+/* facts as a bento sticker card */
+.workdetail-facts {
+  margin: 0;
+  padding: clamp(22px, 3vh, 30px) clamp(22px, 2vw, 28px);
+  border: 2px solid var(--ink);
+  border-radius: 22px;
+  box-shadow: 8px 8px 0 var(--ink);
+  background: var(--cream);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.workdetail-fact dt {
   font-family: var(--sans);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--squiggle);
+  color: var(--bg);
 }
-
-.workdetail-meta-cell dd {
-  margin: 6px 0 0;
+.workdetail-fact dd {
+  margin: 7px 0 0;
   font-family: var(--sans);
-  font-size: clamp(15px, 1.4vw, 18px);
+  font-size: clamp(15px, 1.4vw, 17px);
   font-weight: 600;
-  color: var(--cream);
+  color: var(--ink);
 }
 
-.workdetail-content {
-  margin-top: clamp(34px, 6vh, 56px);
-  max-width: 64ch;
+/* stack as dashed sticker chips, echoing the filter chips */
+.workdetail-chips {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.workdetail-chip {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 13px;
+  border-radius: 999px;
+  border: 1.5px dashed var(--ink);
+  color: var(--ink);
+}
+
+.workdetail-story {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(16px, 2.2vh, 22px);
 }
 
 .workdetail-body {
-  font-size: clamp(17px, 1.5vw, 20px);
+  margin: 0;
+  max-width: 60ch;
+  font-size: clamp(17px, 1.4vw, 20px);
   line-height: 1.7;
-  color: var(--cream);
-  opacity: 0.92;
+  color: var(--ink);
 }
 
+/* product-image gallery — bento sticker tiles */
+.workdetail-gallery {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(16px, 1.5vw, 22px);
+  /* keep tiles at their natural height so uneven images don't stretch */
+  align-items: start;
+}
+.workdetail-gallery.is-multi {
+  grid-template-columns: repeat(2, 1fr);
+}
+.workdetail-shot {
+  /* hug the image so the navy sticker doesn't show bars around it */
+  width: fit-content;
+  max-width: 100%;
+  margin: 0;
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 8px 8px 0 var(--ink);
+  background: var(--ink);
+}
+.workdetail-shot img {
+  display: block;
+  margin: 0;
+  max-width: 100%;
+  /* bound the size but keep the natural aspect ratio (no crop) */
+  max-height: clamp(260px, 46vh, 460px);
+  width: auto;
+  height: auto;
+}
+
+/* "see the results" jump button, sits up in the story and scrolls to gallery */
+.workdetail-jump {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 20px;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 var(--ink);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.workdetail-jump svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.workdetail-jump:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+.workdetail-jump:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+
+/* gallery heading above the shots, scroll target for the jump button */
+.workdetail-gallery-block {
+  scroll-margin-top: 96px;
+}
+.workdetail-gallery-block .workdetail-h {
+  color: var(--ink);
+  font-size: 13px;
+}
+
+/* link + "see the results" cluster: in the sidebar on desktop, surfaced
+   under the intro on phone (the two wrappers swap via the mobile media query) */
+.workdetail-aside-cta {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(18px, 3vh, 24px);
+}
+.workdetail-cta-mobile {
+  display: none;
+}
+
+/* highlights as a bento sticker card, in the sidebar under the facts */
 .workdetail-highlights {
-  margin-top: clamp(34px, 6vh, 52px);
+  margin: 0;
+  padding: clamp(22px, 3vh, 28px) clamp(22px, 2vw, 26px);
+  border: 2px solid var(--ink);
+  border-radius: 22px;
+  box-shadow: 8px 8px 0 var(--ink);
+  background: var(--cream);
 }
 
 .workdetail-h {
-  margin: 0 0 18px;
+  margin: 0 0 16px;
   font-family: var(--sans);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--squiggle);
+  color: var(--bg);
 }
 
 .workdetail-highlights ul {
@@ -1436,9 +1714,9 @@ section {
   display: flex;
   align-items: flex-start;
   gap: 14px;
-  font-size: clamp(16px, 1.4vw, 19px);
+  font-size: clamp(16px, 1.4vw, 18px);
   line-height: 1.5;
-  color: var(--cream);
+  color: var(--ink);
 }
 
 .workdetail-highlights li svg {
@@ -1446,25 +1724,25 @@ section {
   width: 22px;
   height: 22px;
   margin-top: 2px;
-  fill: var(--squiggle);
+  fill: var(--bg);
 }
 
-/* outbound link as a solid sticker button */
+/* outbound link as a navy sticker button */
 .workdetail-link {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
-  margin-top: clamp(34px, 6vh, 52px);
-  padding: 14px 26px;
+  padding: 14px 24px;
   border-radius: 999px;
-  background: var(--squiggle);
-  color: var(--ink-deep);
+  background: var(--bg);
+  color: var(--cream);
   font-family: var(--sans);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.03em;
   text-decoration: none;
-  box-shadow: 5px 5px 0 var(--ink-deep);
+  box-shadow: 5px 5px 0 var(--ink);
   transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
@@ -1480,12 +1758,12 @@ section {
 
 .workdetail-link:hover {
   transform: translate(-1px, -1px);
-  box-shadow: 6px 6px 0 var(--ink-deep);
+  box-shadow: 6px 6px 0 var(--ink);
 }
 
 .workdetail-link:active {
   transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0 var(--ink-deep);
+  box-shadow: 1px 1px 0 var(--ink);
 }
 
 @keyframes workdetailFade {
@@ -1517,9 +1795,38 @@ section {
   }
 }
 
-@media (max-width: 720px) {
-  .workdetail-meta {
-    gap: 18px 32px;
+@media (max-width: 860px) {
+  .workdetail-grid {
+    grid-template-columns: 1fr;
+    gap: clamp(24px, 4vh, 36px);
+  }
+  .workdetail-aside {
+    position: static;
+    height: auto;
+    justify-content: flex-start;
+  }
+  .workdetail-gallery.is-multi {
+    grid-template-columns: 1fr;
+  }
+  /* phone: let gallery images fill the column instead of shrinking to a
+     height cap (which left them narrower than the text and cramped-looking) */
+  .workdetail-shot {
+    width: 100%;
+  }
+  .workdetail-shot img {
+    width: 100%;
+    max-height: none;
+  }
+  /* phone: "see the results" surfaces right under the intro; the link stays
+     down in the sidebar cluster at the bottom of the stack */
+  .workdetail-cta-mobile {
+    display: flex;
+  }
+  .workdetail-cta-mobile .workdetail-link {
+    display: none;
+  }
+  .workdetail-aside-cta .workdetail-jump {
+    display: none;
   }
 }
 
@@ -1534,13 +1841,83 @@ section {
 @media (max-width: 720px) {
   .journey {
     margin: 72px calc(50% - 50vw);
-    padding: 56px 0;
   }
-  .journey .section-label {
-    margin-bottom: 28px;
+  /* phone: portrait sticks to the bottom as a faint backdrop;
+     "My journey" heading sticks above the scrolling list */
+  .journey-aside {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    z-index: 0;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+  .journey-media {
+    position: sticky;
+    top: auto;
+    bottom: 0;
+    width: 100%;
+    max-width: none;
+    height: clamp(420px, 78vh, 760px);
+    max-height: none;
+    aspect-ratio: auto;
+    margin: 0;
+  }
+  .journey-media-img {
+    opacity: 0.16;
+    object-position: center top;
+  }
+  .journey-head.section-heading {
+    position: sticky;
+    top: 80px;
+    z-index: 2;
+  }
+  .journey-list-window {
+    position: relative;
+    z-index: 1;
+  }
+  /* calmer accordion: give each era real scroll travel so it opens and closes
+     smoothly as you scroll instead of snapping (rows are short on desktop) */
+  .jitem {
+    min-height: 42vh;
   }
   .about-portrait-frame::before {
     transform: translate(12px, 12px);
+  }
+}
+
+/* phone: ease each era up on its own, staggered, instead of fading the whole
+   list as one block — reads as the timeline assembling itself */
+@media (max-width: 720px) and (prefers-reduced-motion: no-preference) {
+  .journey-list {
+    opacity: 1;
+    transform: none;
+  }
+  .jitem {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  .journey-reveal .jitem {
+    animation: jitemIn 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .journey-reveal .jitem:nth-child(2) {
+    animation-delay: 0.12s;
+  }
+  .journey-reveal .jitem:nth-child(3) {
+    animation-delay: 0.24s;
+  }
+}
+
+@keyframes jitemIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -1548,7 +1925,7 @@ section {
 /* its own full page (route /work) on the white + blueprint-dot ground */
 .workpage {
   position: relative;
-  min-height: 100vh;
+  min-height: 100dvh;
   background: var(--cream);
 }
 
@@ -1580,98 +1957,49 @@ section {
   clip-path: inset(0 0 -120px 0);
 }
 
-/* mobile burger panel hangs below the nav — give it room before the clip. */
+/* mobile menu is a full-screen overlay — drop the clip so it isn't cropped. */
 .work-band.menu-open {
   overflow: visible;
-  clip-path: inset(0 0 -480px 0);
+  clip-path: none;
 }
 
-/* nav lifts out of flow so the title block sits directly under it */
+/* nav lifts out of flow so the intro block sits directly under it.
+   sized to match Home's compact (scrolled) nav so it's consistent across pages */
 .work-band .topnav {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   z-index: 2;
-  padding: 12px max(48px, calc(50vw - 620px));
+  padding: 12px var(--gutter-x);
+  /* logo left, links pushed right */
+  justify-content: flex-start;
+}
+.work-band .topnav-logo {
+  font-size: 18px;
+}
+.work-band .topnav-right {
+  margin-left: auto;
 }
 
-/* title block under the nav, centered to match the grid container width */
-.work-band-hero {
-  position: relative;
-  z-index: 1;
-  max-width: 1560px;
-  margin: 0 auto;
-  padding: calc(72px + clamp(8px, 1.5vh, 22px)) clamp(20px, 4vw, 56px)
-    clamp(48px, 7vh, 88px);
-}
-
-.work-band-spacer {
-  width: 100%;
-}
-
-/* sticky filter bar that pins right under the collapsed nav */
-.work-filters-bar {
-  position: sticky;
-  top: 72px;
-  z-index: 8;
-  background: var(--cream);
-  padding: 14px clamp(20px, 4vw, 56px);
-  box-shadow: 0 1px 0 rgba(13, 19, 82, 0.1);
-}
-
-.work-filters-bar .work-filters {
-  max-width: 1560px;
-  margin: 0 auto;
-}
-
-@media (max-width: 720px) {
-  .work-band .topnav {
-    padding: 12px 24px;
-  }
-  .work-filters-bar {
-    top: 64px;
-  }
-}
-
-.workpage-inner {
-  position: relative;
-  z-index: 1;
-  max-width: 1560px;
-  margin: 0 auto;
-  padding: clamp(20px, 4vh, 44px) clamp(20px, 4vw, 56px)
-    clamp(64px, 10vh, 120px);
-}
-
-/* eyebrow owns its own line under the back link */
-.work-band-hero .section-eyebrow {
-  display: block;
-  color: var(--squiggle);
-}
-
-/* back link sits above the title like a breadcrumb */
-.workpage-back {
-  display: flex;
-  width: fit-content;
+/* Back control, leftmost in the nav on /work */
+.topnav-back {
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 26px;
-  padding: 9px 18px 9px 14px;
-  border: 2px solid var(--cream);
+  gap: 7px;
+  padding: 8px 16px 8px 12px;
+  border: 1.5px solid currentColor;
   border-radius: 999px;
   background: transparent;
+  color: inherit;
   font-family: var(--sans);
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--cream);
-  box-shadow: 4px 4px 0 var(--squiggle);
-  transition: translate 0.18s ease, box-shadow 0.18s ease, background 0.18s ease,
-    color 0.18s ease;
+  transition: background 0.2s ease, color 0.2s ease, translate 0.15s ease;
 }
-
-.workpage-back svg {
+.topnav-back svg {
   width: 16px;
   height: 16px;
   fill: none;
@@ -1681,47 +2009,304 @@ section {
   stroke-linejoin: round;
   transition: transform 0.2s ease;
 }
-
-.workpage-back:hover {
-  background: var(--squiggle);
+.topnav-back:hover {
+  background: var(--cream);
   color: var(--ink);
-  translate: -2px -2px;
-  box-shadow: 6px 6px 0 var(--squiggle);
+  translate: -2px 0;
 }
-
-.workpage-back:hover svg {
+.topnav-back:hover svg {
   transform: translateX(-2px);
 }
 
-.workpage-back:active {
-  translate: 2px 2px;
-  box-shadow: 1px 1px 0 var(--squiggle);
+.work-band-spacer {
+  width: 100%;
 }
 
-.workpage-title {
-  margin: 12px 0 0;
-  font-family: var(--display);
-  font-size: clamp(44px, 7vw, 104px);
-  line-height: 0.92;
-  letter-spacing: -0.01em;
+/* filter bar — scrolls normally in the white area below the band */
+.work-filters-bar {
+  position: relative;
+  z-index: 1;
+  padding: clamp(8px, 2vh, 20px) var(--gutter-x) 0;
+}
+
+/* filters on the left, count + sort on the right */
+.work-filters-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+}
+
+.work-toolbar {
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 1.4vw, 18px);
+}
+
+.work-count {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
+  color: var(--ink);
+  opacity: 0.6;
+  white-space: nowrap;
+}
+
+/* segmented sort control — same ink-on-cream family as the filter chips */
+.work-sort {
+  display: inline-flex;
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.work-sort-btn {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 8px 14px;
+  background: transparent;
+  color: var(--ink);
+  border: none;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.work-sort-btn + .work-sort-btn {
+  border-left: 1.5px solid var(--ink);
+}
+
+.work-sort-btn:hover {
+  background: rgba(36, 68, 232, 0.08);
+}
+
+.work-sort-btn.is-active {
+  background: var(--ink);
   color: var(--cream);
 }
 
-.workpage-lead {
-  margin: 18px 0 28px;
-  max-width: 52ch;
+@media (max-width: 540px) {
+  /* stack the toolbar so the segmented sort gets a full-width row of its own
+     instead of overflowing the count beside it */
+  .work-toolbar {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .work-sort {
+    width: 100%;
+  }
+  .work-sort-btn {
+    flex: 1;
+    text-align: center;
+  }
+}
+
+@media (max-width: 720px) {
+  .work-band .topnav {
+    padding: 12px 24px;
+  }
+  .work-band .topnav-logo {
+    font-size: 14px;
+  }
+}
+
+.workpage-inner {
+  position: relative;
+  z-index: 1;
+  padding: clamp(20px, 4vh, 44px) var(--gutter-x) clamp(64px, 10vh, 120px);
+}
+
+/* ---------- /work intro (back + title + info card) ---------- */
+.archives-head {
+  position: relative;
+  z-index: 1;
+}
+
+.archives-head-inner {
+  padding: clamp(22px, 4vh, 44px) var(--gutter-x) 0;
+}
+
+/* relocated Back control — ink pill that reads on the white area */
+.archives-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: clamp(16px, 3vh, 28px);
+  padding: 8px 16px 8px 12px;
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: background 0.2s ease, color 0.2s ease, translate 0.15s ease;
+}
+.archives-back svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.2s ease;
+}
+.archives-back:hover {
+  background: var(--ink);
+  color: var(--cream);
+  translate: -2px 0;
+}
+.archives-back:hover svg {
+  transform: translateX(-2px);
+}
+
+/* page title, in the blue eyebrow style */
+.archives-eyebrow {
+  margin: 0;
+  color: var(--bg);
+}
+
+/* intro tile that leads the bento — quick note on the archive */
+.work-tile.is-info {
+  justify-content: space-between;
+  cursor: default;
+}
+.work-tile.is-info:hover {
+  translate: 0 0;
+  box-shadow: 8px 8px 0 var(--ink);
+}
+.work-tile.is-info .info-greet,
+.work-tile.is-info .info-main {
+  margin: 0;
   font-family: var(--serif);
-  font-style: italic;
-  font-size: clamp(17px, 1.6vw, 22px);
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.72);
+  font-size: clamp(18px, 2vw, 26px);
+  line-height: 1.35;
+  color: var(--ink);
+  text-wrap: balance;
+}
+/* keep the greeting + body vertically centred; the note stays pinned at the bottom */
+.work-tile.is-info .info-top {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+/* the "Hi :)" line sits just above the body — a small nudge, not a full blank line */
+.work-tile.is-info .info-greet {
+  margin-bottom: 0.6em;
+}
+/* highlighter swipe on the important phrases */
+.work-tile.is-info .info-main mark {
+  background: rgba(36, 68, 232, 0.18);
+  color: var(--ink);
+  padding: 0 0.15em;
+  border-radius: 2px;
+}
+.work-tile.is-info .info-note {
+  margin: 0;
+  align-self: flex-end;
+  text-align: right;
+  font-family: var(--serif);
+  font-size: clamp(18px, 2vw, 26px);
+  line-height: 1.35;
+  color: var(--ink-soft);
+  opacity: 0.7;
 }
 
 .work-filters {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+/* phone-only trigger that collapses the chip + sort drawer; hidden on desktop.
+   Marked with the site's flower glyph; inverts to solid ink when open, reusing
+   the same "solid = active" language as the chips and sort control. */
+.work-filters-toggle {
+  display: none;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 16px 7px 13px;
+  border-radius: 999px;
+  border: 1.5px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.work-filters-flower {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  fill: currentColor;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.work-filters-eyebrow {
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+
+.work-filters-value {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* open: invert + the flower turns one petal-step, like a small bloom */
+.work-filters-toggle[aria-expanded='true'] {
+  background: var(--ink);
+  color: var(--cream);
+}
+
+.work-filters-toggle[aria-expanded='true'] .work-filters-eyebrow {
+  opacity: 0.7;
+}
+
+.work-filters-toggle[aria-expanded='true'] .work-filters-flower {
+  transform: rotate(72deg) scale(1.06);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .work-filters-flower {
+    transition: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .work-filters-toggle {
+    display: inline-flex;
+  }
+  /* collapsed by default on phone; the toggle reveals the chips */
+  .work-filters {
+    display: none;
+    width: 100%;
+  }
+  .work-filters.is-open {
+    display: flex;
+  }
+  /* sort folds into the same panel — collapsed phone view shows only the
+     Filter toggle (count stays as plain text) */
+  .work-sort {
+    display: none;
+  }
+  .work-sort.is-open {
+    display: inline-flex;
+  }
 }
 
 /* dashed chip that solidifies when active — same family as the skill tags */
@@ -1751,9 +2336,13 @@ section {
   color: var(--cream);
 }
 
+/* fixed 6-col grid so spans pack into clean rows: small = span 2 (3/row),
+   featured = span 3 (2/row). dense flow backfills the gaps left by mixing. */
 .work-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(6, 1fr);
+  /* equal row tracks so every tile lands the same height across rows */
+  grid-auto-rows: 1fr;
   grid-auto-flow: dense;
   gap: clamp(16px, 1.4vw, 22px);
 }
@@ -1779,6 +2368,11 @@ section {
   animation-play-state: running;
 }
 
+/* Velra isn't clickable — a click shakes the tile (reuses bento-nope) */
+.work-tile.work-nope {
+  animation: bento-nope 0.25s ease;
+}
+
 .work-tile:hover,
 .work-tile:focus-visible {
   translate: -4px -4px;
@@ -1797,8 +2391,19 @@ section {
   }
 }
 
-.work-tile.is-featured {
+/* small (default) tiles take 2 of 6 cols → 3 per row */
+.work-tile {
   grid-column: span 2;
+}
+
+/* featured/long tiles take 3 of 6 cols → 2 per row */
+.work-tile.is-featured {
+  grid-column: span 3;
+}
+
+/* big tiles take 4 of 6 cols → a small (span 2) fills the rest of the row */
+.work-tile.is-big {
+  grid-column: span 4;
 }
 
 /* the two apps echo the building bento: blue when featured, navy otherwise */
@@ -1944,6 +2549,28 @@ section {
   color: rgba(255, 255, 255, 0.82);
 }
 
+/* one-line outcome/credibility signal — a small flagged result on the tile */
+.work-outcome {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  margin: 10px 0 2px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  background: rgba(36, 68, 232, 0.1);
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+}
+
+.work-tile.is-app .work-outcome,
+.work-tile.has-img .work-outcome {
+  background: rgba(255, 255, 255, 0.16);
+  color: var(--cream);
+}
+
 .work-cats {
   list-style: none;
   display: flex;
@@ -1951,6 +2578,17 @@ section {
   gap: 6px;
   padding: 0;
   margin: 6px 0 0;
+}
+
+/* empty-filter message spanning the whole grid */
+.work-empty {
+  grid-column: 1 / -1;
+  padding: clamp(40px, 8vh, 80px) 0;
+  text-align: center;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(18px, 2vw, 24px);
+  color: rgba(13, 19, 82, 0.6);
 }
 
 .work-cats li {
@@ -1971,11 +2609,29 @@ section {
   }
 }
 
+/* mid widths: drop to 4 cols — small = span 2 (2/row), featured = full row */
+@media (max-width: 1024px) {
+  .work-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .work-tile {
+    grid-column: span 2;
+  }
+  .work-tile.is-featured,
+  .work-tile.is-big {
+    grid-column: span 4;
+  }
+}
+
 @media (max-width: 860px) {
   .work-grid {
     grid-template-columns: 1fr;
+    /* single column: let each tile size to its own content again */
+    grid-auto-rows: auto;
   }
-  .work-tile.is-featured {
+  .work-tile,
+  .work-tile.is-featured,
+  .work-tile.is-big {
     grid-column: auto;
   }
   .work-tile {
@@ -1991,10 +2647,13 @@ section {
 /* ---------- About ---------- */
 .about {
   position: relative;
-  margin-top: 56px;
-  /* shorter frame, with the row centred so text + portrait sit lower (not
-     jammed under the nav) and there's less empty space before the footer */
-  min-height: calc(100vh - 360px);
+  box-sizing: border-box;
+  /* the snap frames About's end with the footer scallop peeking in by NAV_HEIGHT
+     (72px); reserve the chips band + twice that peek, then add back the ~24px
+     scallop-bubble height */
+  min-height: calc(100dvh - 120px - clamp(120px, 16vh, 168px));
+  padding-top: clamp(72px, 10vh, 140px);
+  padding-bottom: clamp(24px, 4vh, 56px);
   display: grid;
   grid-template-columns: 1.1fr 1fr;
   gap: 56px;
@@ -2106,7 +2765,7 @@ section {
   justify-content: center;
   gap: clamp(14px, 2vw, 28px);
   flex-wrap: wrap;
-  padding: 0 max(32px, calc(50vw - 640px));
+  padding: 0 var(--gutter-x);
   transform: translateY(calc(var(--reveal, 0) * -110px));
   opacity: calc(1 - var(--reveal, 0) * 1.4);
 }
@@ -2185,7 +2844,7 @@ section {
   z-index: 1;
   width: 100%;
   aspect-ratio: 4 / 5;
-  max-height: 44vh;
+  max-height: 52vh;
   object-fit: cover;
   display: block;
   border-radius: 22px;
@@ -2247,8 +2906,10 @@ section {
 }
 
 @media (max-width: 720px) {
+  /* leave room around the photo so the flower + offset card (which sit
+     -22px/+16px outside the frame) don't clip against the screen edges */
   .about-portrait {
-    max-width: 360px;
+    max-width: 300px;
     width: 100%;
     justify-self: center;
   }
@@ -2296,21 +2957,9 @@ section {
 }
 
 @media (max-width: 720px) {
-  /* the wrapped chip rows are taller than the fixed band — let the skills
-     define the height instead of overflowing into the portrait above */
-  .ticker-zone {
-    height: auto;
-    min-height: 140px;
-  }
+  /* "What I bring" skills block is hidden on phone */
   .about-skills {
-    position: relative;
-    inset: auto;
-    flex-direction: column;
-    gap: 16px;
-    padding: 30px 18px 26px;
-  }
-  .skill-tags {
-    justify-content: center;
+    display: none;
   }
 }
 
@@ -2364,6 +3013,27 @@ section {
 @media (prefers-reduced-motion: reduce) {
   .ticker-track {
     animation: none;
+  }
+}
+
+/* mobile-only ticker, flush under the footer scallop so it stays in view at
+   the bottom (the band-above-footer copy scrolls off-screen on phones) */
+.ticker.ticker--footer {
+  display: none;
+  position: static;
+  inset: auto;
+  transform: none;
+  margin: -48px calc(-1 * var(--gutter-x)) 0;
+  padding: 12px 0;
+}
+
+.ticker.ticker--footer .ticker-track span {
+  -webkit-text-stroke-color: rgba(255, 255, 255, 0.22);
+}
+
+@media (max-width: 720px) {
+  .ticker.ticker--footer {
+    display: flex;
   }
 }
 
@@ -2581,7 +3251,7 @@ section {
   color: var(--cream);
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
-  padding: 72px max(40px, calc(50vw - 640px)) 36px;
+  padding: 72px var(--gutter-x) 36px;
   display: flex;
   flex-direction: column;
   gap: 56px;
@@ -2631,13 +3301,45 @@ section {
   }
 }
 
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 72px;
+  align-items: start;
+}
+
 .footer-intro {
   display: flex;
   flex-direction: column;
   gap: 18px;
 }
 
+.footer-intro .section-eyebrow {
+  color: var(--squiggle);
+}
+
+/* faint hollow "Say hi" behind the block — same motif as the section watermarks */
+.footer-watermark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  font-family: var(--display);
+  font-size: clamp(140px, 30vw, 460px);
+  line-height: 0.8;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.06);
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+
 .footer-headline {
+  position: relative;
+  margin: 0;
   font-family: var(--display);
   font-size: clamp(40px, 5.5vw, 80px);
   line-height: 0.95;
@@ -2645,17 +3347,14 @@ section {
   text-transform: uppercase;
 }
 
-/* the accent word breaks the Anton wall, same move as the hero's "exist" */
+/* accent word stays in the Anton family — just the periwinkle colour sets it apart */
 .footer-headline em {
-  font-family: var(--serif);
-  font-style: italic;
-  font-weight: 400;
-  text-transform: lowercase;
-  font-size: 1.06em;
+  font-style: normal;
   color: var(--squiggle);
 }
 
 .footer-sub {
+  margin: 0;
   font-family: var(--serif);
   font-style: italic;
   font-size: clamp(18px, 1.8vw, 24px);
@@ -2664,33 +3363,15 @@ section {
   max-width: 540px;
 }
 
-.footer-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 72px;
-  align-items: start;
-}
-
 .footer-links {
   display: flex;
-  flex-direction: row;
   flex-wrap: wrap;
-  gap: 24px;
   align-items: baseline;
-  margin-top: 48px;
+  gap: 22px;
+  margin-top: 30px;
 }
 
-.footer-heading {
-  font-family: var(--display);
-  font-size: clamp(36px, 4.5vw, 64px);
-  line-height: 0.95;
-  letter-spacing: 0.01em;
-  text-transform: uppercase;
-  /* electric blue sinks into the navy — the pale periwinkle actually reads */
-  color: var(--squiggle);
-}
-
-/* the email is the footer's focal point — set it big, serif, underlined */
+/* the email is the footer's focal point — big serif, underlined */
 .footer-email {
   font-family: var(--serif);
   font-style: italic;
@@ -2699,72 +3380,54 @@ section {
   padding-bottom: 4px;
   transition: color 0.2s ease;
 }
-
 .footer-email:hover {
   color: var(--squiggle);
 }
 
-.footer-socials {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 18px;
+.footer-linkedin {
   font-size: 14px;
-  text-transform: uppercase;
+  font-weight: 600;
   letter-spacing: 0.08em;
-}
-
-.footer-socials a {
-  position: relative;
-  padding: 4px 0;
+  text-transform: uppercase;
   opacity: 0.85;
-  transition: opacity 0.2s ease;
+  /* extra bottom padding so its underline lands at the same depth as the
+     larger email's, even though the text baselines are aligned */
+  padding-bottom: 11px;
+  border-bottom: 2px solid var(--squiggle);
+  transition: color 0.2s ease, opacity 0.2s ease;
 }
 
-.footer-socials a::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  height: 1px;
-  background: currentColor;
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.25s ease;
-}
-
-.footer-socials a:hover {
+.footer-linkedin:hover {
   opacity: 1;
   color: var(--squiggle);
-}
-
-.footer-socials a:hover::after {
-  transform: scaleX(1);
 }
 
 .footer-form {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  /* drop the form down so it lines up with the big headline, not the eyebrow */
+  margin-top: 34px;
 }
 
 .footer-form input,
 .footer-form textarea {
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.25);
-  padding: 12px 0;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  border-radius: 12px;
+  padding: 14px 16px;
   color: var(--cream);
   font: inherit;
   font-size: 15px;
   outline: none;
   width: 100%;
-  border-radius: 0;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, background 0.2s ease;
 }
 
 .footer-form textarea {
-  resize: vertical;
-  min-height: 100px;
+  resize: none;
+  min-height: 120px;
   font-family: var(--sans);
 }
 
@@ -2775,37 +3438,35 @@ section {
 
 .footer-form input:focus,
 .footer-form textarea:focus {
-  border-bottom-color: var(--cream);
+  border-color: var(--cream);
+  background: rgba(255, 255, 255, 0.08);
 }
 
-/* sticker button, same family as the hero CTA */
+/* clean pill, same family as the hero CTA — no hard sticker shadow */
 .footer-form button {
   align-self: flex-start;
   margin-top: 12px;
   background: var(--squiggle);
   color: var(--ink);
-  border: 2px solid var(--ink-deep);
+  border: none;
   border-radius: 999px;
-  padding: 14px 30px;
+  padding: 15px 32px;
   font-family: var(--sans);
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
-  box-shadow: 5px 5px 0 var(--ink-deep);
-  transition: translate 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  transition: background 0.2s ease, transform 0.2s ease;
 }
 
 .footer-form button:hover {
   background: var(--cream);
-  translate: -2px -2px;
-  box-shadow: 8px 8px 0 var(--ink-deep);
+  transform: translateY(-2px);
 }
 
 .footer-form button:active {
-  translate: 3px 3px;
-  box-shadow: 1px 1px 0 var(--ink-deep);
+  transform: translateY(0);
 }
 
 .footer-form-note {
@@ -2852,12 +3513,17 @@ section {
   .footer-intro {
     gap: 14px;
   }
+  /* On phone the form's keyboard handling is fiddly and the email/LinkedIn
+     links right above cover the same need — so drop the form here. */
   .footer-form {
-    gap: 12px;
+    display: none;
   }
   .footer-grid {
     grid-template-columns: 1fr;
     gap: 28px;
+  }
+  .footer-links {
+    margin-top: 18px;
   }
   .footer-bottom {
     flex-direction: column;
@@ -2874,14 +3540,37 @@ section {
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  padding: 44px max(48px, calc(50vw - 620px));
+  padding: 44px var(--gutter-x);
   color: inherit;
   flex-shrink: 0;
   transition: padding 0.35s ease;
 }
 
 .top-band.compact .topnav {
-  padding: 12px max(48px, calc(50vw - 620px));
+  padding: 12px var(--gutter-x);
+}
+
+/* Scalloped bottom edge hung under the nav. Off everywhere by default; only the
+   mobile pinned-nav case below turns it on. */
+.topnav-scallop {
+  display: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  /* pull up 1px so the navy scallop overlaps the nav backdrop — otherwise a
+     subpixel gap shows the cream page through as a thin line */
+  margin-top: -1px;
+  line-height: 0;
+  pointer-events: none;
+}
+.topnav-scallop svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.topnav-scallop path {
+  fill: var(--ink);
 }
 
 .topnav-logo {
@@ -2926,6 +3615,11 @@ section {
   display: flex;
   align-items: center;
   gap: 4px;
+}
+
+/* only the full-screen mobile menu wears the scalloped edge */
+.topnav-menu-scallop {
+  display: none;
 }
 
 .topnav-links a {
@@ -3006,21 +3700,35 @@ section {
 
 .topnav-menu {
   position: absolute;
-  top: calc(100% + 4px);
+  /* tuck directly under the pill — no gap, so it reads as one connected unit */
+  top: 100%;
   left: 0;
   z-index: 5;
   min-width: 234px;
-  display: none;
+  display: flex;
   flex-direction: column;
   gap: 2px;
   padding: 8px;
-  background: var(--ink);
-  /* square off the top corners so it reads as an extension of the nav pill */
-  border-radius: 4px 4px 16px 16px;
-  box-shadow: 0 18px 44px rgba(13, 19, 82, 0.45);
+  /* same translucent-white wash as the hovered building pill, so trigger and
+     menu read as one piece */
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  /* square the top-left so it lines up flush under the pill's squared bottom */
+  border-radius: 0 4px 16px 16px;
+  box-shadow: 0 14px 30px rgba(7, 11, 51, 0.28);
+  /* hidden until hover — animated (not display-toggled) so it reveals on the
+     same 0.2s easing as the pill, and the two move as one */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transform-origin: top;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease,
+    visibility 0s linear 0.2s;
 }
 
-/* transparent bridge so hover survives the gap between trigger and menu */
+/* transparent bridge keeps hover alive across the pill's rounded bottom edge */
 .topnav-menu::before {
   content: '';
   position: absolute;
@@ -3030,8 +3738,42 @@ section {
   height: 6px;
 }
 
-.topnav-dropdown:hover .topnav-menu {
-  display: flex;
+.topnav-dropdown:hover .topnav-menu,
+.topnav-dropdown:focus-within .topnav-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s;
+}
+
+/* when the building entry is active (e.g. on /work) its pill is cream — match
+   the dropdown to it so trigger + menu read as one connected piece */
+@media (min-width: 721px) {
+  /* keep the trigger lit while the cursor is in the menu, and square its
+     bottom corners so the pill flows straight into the dropdown */
+  .topnav-dropdown:hover .topnav-dropbtn {
+    background: rgba(255, 255, 255, 0.1);
+    opacity: 1;
+    /* fixed ~half-height top radius so the top reads exactly like the other
+       nav pills (a plain 999px here would clamp to the full height — too round
+       — since the squared bottom removes the usual half-height cap) */
+    border-radius: 18px 18px 0 0;
+  }
+  .topnav-dropdown:hover .topnav-dropbtn.active {
+    background: var(--cream);
+  }
+
+  .topnav-dropdown:has(.topnav-dropbtn.active) .topnav-menu {
+    background: var(--cream);
+    box-shadow: 0 18px 44px rgba(13, 19, 82, 0.25);
+  }
+  .topnav-dropdown:has(.topnav-dropbtn.active) .topnav-menu button {
+    color: var(--ink);
+  }
+  .topnav-dropdown:has(.topnav-dropbtn.active) .topnav-menu button:hover {
+    background: rgba(13, 19, 82, 0.08);
+  }
 }
 
 .topnav-menu button {
@@ -3070,10 +3812,39 @@ section {
 
 @media (max-width: 720px) {
   .topnav {
-    padding: 20px 24px;
+    padding: 12px 22px;
   }
   .top-band.compact .topnav {
-    padding: 12px 24px;
+    padding: 12px 22px;
+  }
+  /* pin the nav to the top so it stays put while the hero + page scroll under
+     it (placed here, after the base `position: absolute` rule, so it wins) */
+  .top-band > .topnav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+  /* Navy backdrop fades in with `--nav-reveal` (set from scroll in Home), on the
+     same curve as the hero/photo fade — kept behind the nav content via a -1
+     layer inside the fixed nav's stacking context. */
+  .top-band > .topnav::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--ink);
+    opacity: var(--nav-reveal, 0);
+    z-index: -1;
+  }
+  /* Render (and measure) the scallop on mobile Home; its opacity tracks the same
+     `--nav-reveal` so the scalloped edge appears in lockstep with the backdrop.
+     Hidden while the full-screen menu is open so it doesn't poke under the overlay. */
+  .top-band .topnav-scallop {
+    display: block;
+    opacity: var(--nav-reveal, 0);
+  }
+  .top-band.menu-open .topnav-scallop {
+    opacity: 0;
   }
   .topnav-logo {
     font-size: 16px;
@@ -3082,19 +3853,22 @@ section {
     font-size: 14px;
   }
 
-  /* Links collapse into a dropdown panel toggled by the burger. */
+  /* Burger toggles a full-screen menu; keep it above the overlay so the X
+     stays tappable to close. */
   .topnav-burger {
     display: inline-flex;
     flex-direction: column;
     justify-content: center;
     align-items: stretch;
     gap: 5px;
-    width: 40px;
-    height: 40px;
-    padding: 10px;
+    width: 44px;
+    height: 44px;
+    padding: 11px;
     background: transparent;
     border: none;
     color: inherit;
+    position: relative;
+    z-index: 60;
   }
   .topnav-burger span {
     height: 2px;
@@ -3112,57 +3886,162 @@ section {
     transform: translateY(-7px) rotate(-45deg);
   }
 
+  /* Full-screen overlay that drops down from the top, carrying a scalloped
+     bottom edge so the "wavy" band sweeps down and off-screen as it opens.
+     Kept in the DOM (not display:none) so the transform can animate;
+     visibility gates interaction. overflow visible so the scallop, which sits
+     just below the panel, isn't clipped (nav list is short and always fits). */
   .topnav-links {
-    display: none;
-    position: absolute;
-    top: calc(100% + 18px);
-    left: 16px;
-    right: 16px;
+    position: fixed;
+    inset: 0;
+    height: 100dvh;
+    z-index: 50;
+    display: flex;
     flex-direction: column;
+    justify-content: center;
     align-items: stretch;
-    gap: 2px;
-    padding: 10px;
+    gap: 6px;
+    padding: 104px 32px 56px;
     background: var(--ink);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 18px;
-    box-shadow: 0 18px 44px rgba(13, 19, 82, 0.45);
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: visible;
+    transform: translateY(-100%);
+    visibility: hidden;
+    transition: transform 0.62s cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 0s linear 0.62s;
   }
   .topnav-links.is-open {
-    display: flex;
-  }
-  .topnav-links a {
-    padding: 12px;
-    font-size: 15px;
-    text-align: center;
+    transform: translateY(0);
+    visibility: visible;
+    transition: transform 0.62s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  /* Dropdown flattens into the burger panel: trigger full-width, menu inline. */
+  /* On the hero the whole screen is already the navy band + photo, so a drop
+     would land navy-on-navy. Instead the overlay crossfades in over the hero,
+     darkening the photo and fading the hero content away as the menu appears —
+     no drop, no wave. */
+  .top-band.at-hero .topnav-links {
+    transform: none;
+    opacity: 0;
+    transition: opacity 0.55s ease, visibility 0s linear 0.55s;
+  }
+  .top-band.at-hero .topnav-links.is-open {
+    opacity: 1;
+    transition: opacity 0.55s ease;
+  }
+  .top-band.at-hero .topnav-menu-scallop {
+    display: none;
+  }
+  /* the scalloped band hangs just below the panel's bottom edge, so it rides
+     the descending navy and continues off the bottom when fully open */
+  .topnav-menu-scallop {
+    display: block;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    height: 26px;
+    line-height: 0;
+    pointer-events: none;
+  }
+  .topnav-menu-scallop svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .topnav-menu-scallop path {
+    fill: var(--ink);
+  }
+  .topnav-links a,
+  .topnav-dropdown {
+    padding: 12px 2px;
+    text-align: left;
+    /* staggered rise-in once the panel is open */
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+  /* editorial serif to match the hero's voice, not the generic sans nav */
+  .topnav-links a,
+  .topnav-dropbtn {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: -0.01em;
+    font-size: clamp(34px, 9vw, 46px);
+    color: rgba(255, 255, 255, 0.82);
+  }
+  /* current section: no white pill — just the on-brand periwinkle */
+  .topnav-links a.active,
+  .topnav-dropbtn.active {
+    background: none;
+    color: var(--squiggle);
+    opacity: 1;
+  }
+  .topnav-links.is-open a,
+  .topnav-links.is-open .topnav-dropdown {
+    opacity: 1;
+    transform: none;
+  }
+  .topnav-links.is-open a:nth-child(1),
+  .topnav-links.is-open .topnav-dropdown:nth-child(1) {
+    transition-delay: 0.12s;
+  }
+  .topnav-links.is-open a:nth-child(2),
+  .topnav-links.is-open .topnav-dropdown:nth-child(2) {
+    transition-delay: 0.18s;
+  }
+  .topnav-links.is-open a:nth-child(3),
+  .topnav-links.is-open .topnav-dropdown:nth-child(3) {
+    transition-delay: 0.24s;
+  }
+  .topnav-links.is-open a:nth-child(4),
+  .topnav-links.is-open .topnav-dropdown:nth-child(4) {
+    transition-delay: 0.3s;
+  }
+  .topnav-links.is-open a:nth-child(5),
+  .topnav-links.is-open .topnav-dropdown:nth-child(5) {
+    transition-delay: 0.36s;
+  }
+
+  /* Dropdown flattens inline: trigger reads like the other links, archive
+     link sits under it as a smaller sub-item. */
   .topnav-dropdown {
     display: block;
     width: 100%;
   }
   .topnav-dropbtn {
     width: 100%;
-    justify-content: center;
-    padding: 12px;
-    font-size: 15px;
+    justify-content: flex-start;
+    padding: 0;
   }
   .topnav-menu {
     display: flex;
     position: static;
     min-width: 0;
-    margin-top: 2px;
+    margin-top: 6px;
     padding: 0;
     background: transparent;
     border: none;
     box-shadow: none;
+    /* shown inline inside the overlay — no hover reveal on mobile */
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    pointer-events: auto;
   }
   .topnav-menu::before {
     display: none;
   }
+  /* archive link reads as a smaller sub-item under "Building" */
   .topnav-menu button {
-    justify-content: center;
-    text-align: center;
+    justify-content: flex-start;
+    text-align: left;
+    font-size: 16px;
+    opacity: 0.75;
   }
   .topnav-menu button svg {
     margin-left: 6px;

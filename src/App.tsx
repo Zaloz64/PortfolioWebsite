@@ -6,6 +6,11 @@ import { WorkPage } from './WorkPage'
 
 type Route = 'home' | 'work'
 
+// Vite serves the app under this base (e.g. '/PortfolioWebsite/' on GitHub
+// Pages). Build URLs against it so deep links / refreshes resolve.
+const BASE = import.meta.env.BASE_URL
+const workUrl = (search = '') => `${BASE}work${search}`
+
 const routeFromPath = (): Route =>
   window.location.pathname.includes('/work') ? 'work' : 'home'
 
@@ -52,17 +57,28 @@ function App() {
       return
     }
     const y = route === 'home' ? homeScroll.current : 0
-    requestAnimationFrame(() =>
-      window.scrollTo({ top: y, behavior: 'instant' as ScrollBehavior }),
-    )
+    // The Journey section inflates its (pinned) height in a later effect, so on
+    // the first frame the page can be too short to reach `y` and the scroll
+    // clamps into the navy overscroll. Re-apply until the page is tall enough
+    // to actually land at `y`, capped so we don't loop near the true bottom.
+    let raf = 0
+    let tries = 0
+    const restore = () => {
+      window.scrollTo({ top: y, behavior: 'instant' as ScrollBehavior })
+      if (Math.abs(window.scrollY - y) > 2 && tries++ < 30) {
+        raf = requestAnimationFrame(restore)
+      }
+    }
+    raf = requestAnimationFrame(restore)
+    return () => cancelAnimationFrame(raf)
   }, [route])
 
   const navigate = useCallback(
     (to: Route) => {
-      if (to === 'work' && route !== 'work') {
+      if (to !== 'home' && route === 'home') {
         homeScroll.current = window.scrollY
       }
-      const path = to === 'work' ? '/work' : '/'
+      const path = to === 'work' ? workUrl() : BASE
       if (window.location.pathname !== path) {
         window.history.pushState({}, '', path)
       }
@@ -71,7 +87,17 @@ function App() {
     [route],
   )
 
-  const goWork = useCallback(() => navigate('work'), [navigate])
+  // Optionally open a specific project on the archive (deep-linked via ?p=),
+  // e.g. from a journey "Read more" so it lands on the real work item instead
+  // of a duplicate modal.
+  const goWork = useCallback(
+    (projectId?: string) => {
+      if (route === 'home') homeScroll.current = window.scrollY
+      window.history.pushState({}, '', workUrl(projectId ? `?p=${projectId}` : ''))
+      setRoute('work')
+    },
+    [route],
+  )
   const goHome = useCallback(() => navigate('home'), [navigate])
   // From /work: return to Home and scroll to a given section.
   const goHomeSection = useCallback(

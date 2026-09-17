@@ -1,5 +1,69 @@
-import { FLOWER_D } from '../lib/svg'
+import { useEffect, useRef, useState } from 'react'
+import { FLOWER_D, buildScallopPath } from '../lib/svg'
 import { NAV_ITEMS } from '../lib/constants'
+
+// A navy strip with a scalloped bottom edge, hung under the nav. Only shown on
+// mobile Home, where its opacity tracks `--nav-reveal` (set from scroll) so the
+// scalloped edge fades in on the same curve as the hero/photo fade out. Reuses
+// the hero's `bottomOnly` path so the bumps match exactly.
+function NavScallop() {
+  const ref = useRef<HTMLDivElement>(null)
+  const [w, setW] = useState(0)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const update = () => setW(el.clientWidth)
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  const H = 24
+  const d = w > 0 ? buildScallopPath(w, H, 0, true) : ''
+
+  return (
+    <div ref={ref} className="topnav-scallop" aria-hidden="true" style={{ height: H }}>
+      {d && (
+        <svg viewBox={`0 0 ${w} ${H}`} preserveAspectRatio="none">
+          <path d={d} />
+        </svg>
+      )}
+    </div>
+  )
+}
+
+// Scalloped bottom edge of the full-screen mobile menu. Rides the bottom of the
+// navy panel as it drops from the top, so the "wavy" band sweeps down the screen
+// and off the bottom, leaving it all blue. Reuses the same bumps as the top band.
+function MenuScallop() {
+  const ref = useRef<HTMLDivElement>(null)
+  const [w, setW] = useState(0)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const update = () => setW(el.clientWidth)
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  const H = 26
+  const d = w > 0 ? buildScallopPath(w, H, 0, true) : ''
+
+  return (
+    <div ref={ref} className="topnav-menu-scallop" aria-hidden="true">
+      {d && (
+        <svg viewBox={`0 0 ${w} ${H}`} preserveAspectRatio="none">
+          <path d={d} />
+        </svg>
+      )}
+    </div>
+  )
+}
 
 type SiteNavProps = {
   // Currently active section id (only Home tracks this via IntersectionObserver).
@@ -10,6 +74,8 @@ type SiteNavProps = {
   onSeeWork: () => void
   // True when we're already on the /work page, so the building entry reads as active.
   isWork?: boolean
+  // When on /work, a Back control is shown leftmost in the nav.
+  onBack?: () => void
   menuOpen: boolean
   setMenuOpen: (open: boolean | ((o: boolean) => boolean)) => void
 }
@@ -23,6 +89,7 @@ export function SiteNav({
   onNavSection,
   onSeeWork,
   isWork,
+  onBack,
   menuOpen,
   setMenuOpen,
 }: SiteNavProps) {
@@ -30,6 +97,14 @@ export function SiteNav({
 
   return (
     <header className="topnav" aria-label="Top navigation">
+      {isWork && onBack && (
+        <button className="topnav-back" onClick={onBack}>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 5l-7 7 7 7" />
+          </svg>
+          Back
+        </button>
+      )}
       <a
         className="topnav-logo"
         href="#home"
@@ -107,8 +182,10 @@ export function SiteNav({
               </a>
             ),
           )}
+          <MenuScallop />
         </nav>
       </div>
+      <NavScallop />
     </header>
   )
 }

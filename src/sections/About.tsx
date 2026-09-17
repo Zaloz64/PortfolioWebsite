@@ -45,18 +45,21 @@ export function About() {
     >
       <div className="about-text">
         <span className="section-eyebrow">a little about me</span>
-        <p className="about-lead">
-          I’ve always been drawn to both math and art, but they felt like
-          separate worlds until I found{' '}
-          <em>programming</em>, where logic and creativity finally clicked,
-          and where ideas could become reality.
-        </p>
-        <p className="about-lead about-lead--muted">
-          It started with the arts, then expanded into design and code as I
-          became drawn to building things from the ground up. Today I’m just
-          as interested in the business side of it: strategy, IP, and the
-          work it takes to get a product from idea to reality.
-        </p>
+      <p className="about-lead">
+  I’m a multi-passionate person who loves to learn and take on new challenges.
+  My background is in computer science, and I’ve been programming for nine years
+  now. I still love the problem-solving and creativity it gives you: taking
+  something from nothing into something real.
+</p>
+<p className="about-lead about-lead--muted">
+  Right now I’m doing my master’s in entrepreneurship and business design,
+  because I want to understand every part of a product: from what makes people
+  buy it to the legal side of building a business.
+</p>
+<p className="about-lead about-lead--muted">
+  Outside of that, I love snowboarding, sailing and climbing. So if you ever
+  want to have a business meeting doing any of those, that would be the dream.
+</p>
       </div>
 
       <aside className="about-portrait">

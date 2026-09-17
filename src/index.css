@@ -8,6 +8,10 @@
   --ink-deep: #070b33;
   --squiggle: #a9b8ff;
 
+  /* shared horizontal page rail: content caps at ~1200px so there's generous
+     side whitespace. Used by every page/section so the gutters line up. */
+  --gutter-x: max(48px, calc(50vw - 600px));
+
   --display: 'Anton', 'Archivo Black', system-ui, sans-serif;
   --serif: 'Instrument Serif', 'Playfair Display', Georgia, serif;
   --sans: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
@@ -18,6 +22,13 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+}
+
+/* tighter gutter on small screens */
+@media (max-width: 720px) {
+  :root {
+    --gutter-x: 24px;
+  }
 }
 
 * {

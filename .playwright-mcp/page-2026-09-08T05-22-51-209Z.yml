@@ -1,0 +1,153 @@
+- generic [ref=f13e1]:
+  - main [ref=f13e3]:
+    - generic "Top navigation" [ref=f13e5]:
+      - link "Zoé Opdendries" [ref=f13e6]:
+        - /url: "#home"
+      - generic [ref=f13e10]:
+        - button "Open menu" [ref=f13e11]
+        - button "Everything I’ve made" [ref=f13e16]
+    - generic [ref=f13e21]:
+      - button "Back to home" [ref=f13e22]
+      - heading "the archives" [level=1] [ref=f13e25]
+    - group "Filter work by type" [ref=f13e26]:
+      - generic [ref=f13e27]:
+        - button "Filter All" [ref=f13e28]:
+          - generic [ref=f13e31]: Filter
+          - generic [ref=f13e32]: All
+        - generic [ref=f13e33]: 7 projects
+    - generic [ref=f13e36]:
+      - article [ref=f13e37]:
+        - generic [ref=f13e38]:
+          - paragraph [ref=f13e39]: Hi :) Happy you are intressted in my work!
+          - paragraph [ref=f13e40]:
+            - text: Here you have a
+            - mark [ref=f13e41]: running catalogue
+            - text: of what I have
+            - mark [ref=f13e42]: designd and buildt
+            - text: ", form products, client/job work, and some experiences i have hade in between. Not everything I have made is here yet, more to come."
+        - paragraph [ref=f13e43]: Open any tile to find the full story behind it.
+      - button "Velra, Business, Code & AI, read more" [ref=f13e44]:
+        - generic [ref=f13e45]:
+          - generic [ref=f13e46]: 2025 to now
+          - generic [aria-hidden] [ref=f13e47]: N°01
+        - generic [ref=f13e48]:
+          - heading "Velra" [level=3] [ref=f13e49]
+          - paragraph [ref=f13e50]: Deeptech in the energy market. Building it with a small team out of Gothenburg.
+          - generic [ref=f13e51]: Co-founder · early stage
+          - list [aria-hidden] [ref=f13e52]:
+            - listitem [ref=f13e53]: Business
+            - listitem [ref=f13e54]: Code & AI
+      - button "Digital Friction, Apps, Design, Code & AI, read more" [ref=f13e55]:
+        - generic [ref=f13e56]:
+          - generic [ref=f13e57]: "2025"
+          - generic [aria-hidden] [ref=f13e58]: N°02
+        - generic [ref=f13e59]:
+          - heading "Digital Friction" [level=3] [ref=f13e60]
+          - paragraph [ref=f13e61]: Turns your phone into a dumb phone. App access stays blocked until you finish what you said you would do.
+          - generic [ref=f13e62]: Designed and built solo · on the App Store
+          - list [aria-hidden] [ref=f13e63]:
+            - listitem [ref=f13e64]: Apps
+            - listitem [ref=f13e65]: Design
+            - listitem [ref=f13e66]: Code & AI
+      - button "Flower Power, Apps, Design, Code & AI, read more" [ref=f13e67]:
+        - generic [aria-hidden] [ref=f13e71]: N°03
+        - generic [ref=f13e72]:
+          - generic [ref=f13e73]: Soon
+          - heading "Flower Power" [level=3] [ref=f13e74]
+          - paragraph [ref=f13e75]: A simple plant care app I built because I kept forgetting to water my own plants.
+          - generic [ref=f13e76]: Designed and built solo · core features free
+          - list [aria-hidden] [ref=f13e77]:
+            - listitem [ref=f13e78]: Apps
+            - listitem [ref=f13e79]: Design
+            - listitem [ref=f13e80]: Code & AI
+      - button "LexEnergy, Code & AI, Design, read more" [ref=f13e81]:
+        - generic [ref=f13e82]:
+          - generic [ref=f13e83]: 2024 to 2025
+          - generic [aria-hidden] [ref=f13e84]: N°04
+        - generic [ref=f13e85]:
+          - heading "LexEnergy" [level=3] [ref=f13e86]
+          - paragraph [ref=f13e87]: Frontend for a battery-backed EV charging network that helps chargers work in places where normal grid capacity can be limited.
+          - generic [ref=f13e88]: Sole frontend owner · React, Vite and TypeScript
+          - list [aria-hidden] [ref=f13e89]:
+            - listitem [ref=f13e90]: Code & AI
+            - listitem [ref=f13e91]: Design
+      - button "AI dental diagnosis, Code & AI, read more" [ref=f13e92]:
+        - generic [ref=f13e93]:
+          - generic [ref=f13e94]: "2024"
+          - generic [aria-hidden] [ref=f13e95]: N°05
+        - generic [ref=f13e96]:
+          - heading "AI dental diagnosis" [level=3] [ref=f13e97]
+          - paragraph [ref=f13e98]: "Bachelor thesis: an AI system diagnosing misaligned teeth from clinical imagery."
+          - generic [ref=f13e99]: Bachelor thesis · Chalmers
+          - list [aria-hidden] [ref=f13e100]:
+            - listitem [ref=f13e101]: Code & AI
+      - button "Bridging the Digital Education Gap, Impact, Business, read more" [ref=f13e102]:
+        - generic [ref=f13e103]:
+          - generic [ref=f13e104]: 2023 to 2024
+          - generic [aria-hidden] [ref=f13e105]: N°06
+        - generic [ref=f13e106]:
+          - heading "Bridging the Digital Education Gap" [level=3] [ref=f13e107]
+          - paragraph [ref=f13e108]: Vice Chairman of a Chalmers initiative bringing computers and offline learning tools to schools in KwaZulu-Natal, South Africa.
+          - generic [ref=f13e109]: Funded, planned and set up on site
+          - list [aria-hidden] [ref=f13e110]:
+            - listitem [ref=f13e111]: Impact
+            - listitem [ref=f13e112]: Business
+      - button "EGOI, Code & AI, read more" [ref=f13e113]:
+        - generic [ref=f13e114]:
+          - generic [ref=f13e115]: "2021"
+          - generic [aria-hidden] [ref=f13e116]: N°07
+        - generic [ref=f13e117]:
+          - heading "EGOI" [level=3] [ref=f13e118]
+          - paragraph [ref=f13e119]: Qualified nationally for the European Girls’ Olympiad in Informatics.
+          - list [aria-hidden] [ref=f13e120]:
+            - listitem [ref=f13e121]: Code & AI
+  - dialog "LexEnergy" [ref=f13e122]:
+    - banner "Top navigation" [ref=f13e124]:
+      - link "Zoé Opdendries" [ref=f13e125]:
+        - /url: "#home"
+      - generic [ref=f13e129]:
+        - button "Open menu" [ref=f13e130]
+        - button "Everything I’ve made" [ref=f13e135]
+    - article [ref=f13e138]:
+      - button "Back to archive" [active] [ref=f13e139]
+      - generic [ref=f13e142]:
+        - generic [ref=f13e143]:
+          - generic [ref=f13e144]:
+            - text: 2024 to 2025
+            - heading "LexEnergy" [level=1] [ref=f13e145]
+          - paragraph [ref=f13e146]: Frontend for a battery-backed EV charging network that helps chargers work in places where normal grid capacity can be limited.
+          - paragraph [ref=f13e147]: LexEnergy builds EV charging stations with batteries that support the grid, making it possible to place chargers in more locations. I was the sole frontend owner for the customer-facing charging interface. I designed the full UI and user flow in Figma, then built it with React.
+          - paragraph [ref=f13e148]: The interface was used by EV drivers to start a charge, follow the session, handle payment and get support. It supported Swedish and English, and connected to our own API, a pricing API and an external payment partner.
+          - paragraph [ref=f13e149]: The hardest part was designing around real charging edge cases. Different cars behaved differently, requirements changed often, and the flow still had to feel simple for someone standing at a charger.
+          - paragraph [ref=f13e150]: When I left, the product was live at three stations. What I am most proud of is owning the whole frontend from design to production on a tight deadline.
+          - generic [ref=f13e151]:
+            - heading "Gallery" [level=2] [ref=f13e152]
+            - figure [ref=f13e154]
+        - complementary [ref=f13e155]:
+          - generic [ref=f13e156]:
+            - generic [ref=f13e157]:
+              - term [ref=f13e158]: Role
+              - definition [ref=f13e159]: Sole frontend developer
+            - generic [ref=f13e160]:
+              - term [ref=f13e161]: Year
+              - definition [ref=f13e162]: 2024 to 2025
+            - generic [ref=f13e163]:
+              - term [ref=f13e164]: Stack
+              - definition [ref=f13e165]:
+                - list [ref=f13e166]:
+                  - listitem [ref=f13e167]: React
+                  - listitem [ref=f13e168]: TypeScript
+                  - listitem [ref=f13e169]: Vite
+                  - listitem [ref=f13e170]: Figma
+          - generic [ref=f13e171]:
+            - heading "Highlights" [level=2] [ref=f13e172]
+            - list [ref=f13e173]:
+              - listitem [ref=f13e174]:
+                - generic [ref=f13e177]: Owned the frontend from Figma to production
+              - listitem [ref=f13e178]:
+                - generic [ref=f13e181]: Built the charging flow for drivers
+              - listitem [ref=f13e182]:
+                - generic [ref=f13e185]: Designed around real EV charging edge cases
+              - listitem [ref=f13e186]:
+                - generic [ref=f13e189]: Live at three stations
+          - button "See the results" [ref=f13e190]

@@ -11,11 +11,11 @@ const SKILLS = [
   'Business design',
 ] as const
 
-function Ticker() {
+function Ticker({ className = '' }: { className?: string }) {
   const phrase =
     'Developer · Designer · Frontend · AI · Backend · Strategy · Generalist · Maker · '
   return (
-    <div className="ticker" aria-hidden="true">
+    <div className={`ticker${className ? ` ${className}` : ''}`} aria-hidden="true">
       <div className="ticker-track">
         <span>{phrase.repeat(4)}</span>
         <span>{phrase.repeat(4)}</span>
@@ -150,38 +150,56 @@ export function Footer() {
         className={`footer ${footerInView ? 'footer-reveal' : ''}`}
         id="contact"
       >
+        {/* On mobile the band-above-footer ticker scrolls off-screen, so show
+            a copy flush under the scallop where it stays visible at the bottom. */}
+        {/* <Ticker className="ticker--footer" /> */}
+        <span className="footer-watermark" aria-hidden="true">
+          Say hi
+        </span>
         <div className="footer-grid">
           <div className="footer-intro">
+            <span className="section-eyebrow">Let’s work together</span>
             <h2 className="footer-headline">
               Need a hand with <em>something</em>?
             </h2>
             <p className="footer-sub">
-              I do design, code, and the in-between. Drop me a line and
-              we'll figure it out.
+              I do design, code, and the in-between. Drop me a message and we’ll
+              figure out what we can do together.
             </p>
             <div className="footer-links">
               <a className="footer-email" href="mailto:zoe@zalo.se">
                 zoe@zalo.se
               </a>
-              <div className="footer-socials">
-                <a
-                  href="https://www.linkedin.com/in/zo%C3%A9-opdendries-007b19132/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  LinkedIn
-                </a>
-              </div>
+              <a
+                className="footer-linkedin"
+                href="https://www.linkedin.com/in/zo%C3%A9-opdendries-007b19132/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                LinkedIn
+              </a>
             </div>
           </div>
 
           <form className="footer-form" onSubmit={handleContactSubmit}>
-            <h3 className="footer-heading">Tell me about it</h3>
-            <input type="text" name="name" placeholder="Name" required />
-            <input type="email" name="email" placeholder="Email" required />
+            <input
+              type="text"
+              name="name"
+              placeholder="Name"
+              aria-label="Name"
+              required
+            />
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              aria-label="Email"
+              required
+            />
             <textarea
               name="message"
               placeholder="What do you have in mind?"
+              aria-label="What do you have in mind?"
               rows={4}
               required
             />
@@ -196,8 +214,8 @@ export function Footer() {
         </div>
 
         <div className="footer-bottom">
-          <span>© 2026 Zoé</span>
-          <span>Made in Gothenburg · @zoetechandme</span>
+          <span>© 2026 Zoé Opdendries</span>
+          <span>Made in Gothenburg</span>
         </div>
       </div>
     </footer>

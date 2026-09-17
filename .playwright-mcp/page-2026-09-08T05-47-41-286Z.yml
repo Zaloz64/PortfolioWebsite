@@ -1,0 +1,118 @@
+- main [ref=f20e3]:
+  - generic [ref=f20e4]:
+    - generic "Top navigation" [ref=f20e5]:
+      - link "Zoé Opdendries" [ref=f20e6]:
+        - /url: "#home"
+      - generic [ref=f20e10]:
+        - button "Open menu" [ref=f20e11]
+        - button "Everything I’ve made" [ref=f20e16]
+    - generic [ref=f20e19]:
+      - generic [ref=f20e20]:
+        - heading "I make the things I wish exist" [level=1] [ref=f20e21]:
+          - generic [ref=f20e22]: I make the things
+          - generic [ref=f20e23]: I wish exist
+        - paragraph [ref=f20e24]: Business strategist, coder & designer in Gothenburg. If something here connects to what you're doing...
+        - link "Just say hi →" [ref=f20e25]:
+          - /url: "#contact"
+      - link "Scroll to explore" [ref=f20e26]:
+        - /url: "#building"
+  - generic [ref=f20e30]:
+    - generic [ref=f20e31]:
+      - generic [ref=f20e32]: things i’m making
+      - button "See everything I've made" [ref=f20e33]: Everything I’ve made
+    - generic [ref=f20e36]:
+      - button "On the App Store Digital Friction Turns your phone into a dumb phone. App access stays blocked until you finish what you said you'd do. Frictionless is the problem." [ref=f20e37]:
+        - generic [ref=f20e40]:
+          - generic [ref=f20e41]: On the App Store
+          - heading "Digital Friction" [level=3] [ref=f20e42]
+          - paragraph [ref=f20e43]: Turns your phone into a dumb phone. App access stays blocked until you finish what you said you'd do. Frictionless is the problem.
+      - button "Market validation Velra Testing whether an energy market idea has real value before it becomes a venture. Running the business development and market validation out of Gothenburg." [ref=f20e44]:
+        - generic [ref=f20e47]:
+          - generic [ref=f20e48]: Market validation
+          - heading "Velra" [level=3] [ref=f20e49]
+          - paragraph [ref=f20e50]: Testing whether an energy market idea has real value before it becomes a venture. Running the business development and market validation out of Gothenburg.
+      - article [ref=f20e51]:
+        - generic [ref=f20e52]:
+          - generic [ref=f20e53]: Available
+          - heading "Selected projects" [level=3] [ref=f20e54]
+          - paragraph [ref=f20e55]: Websites and software, designed and built to spec. I take on a few projects a year alongside Velra.
+    - button "Need something built? Contact me" [ref=f20e56]
+  - generic [ref=f20e60]:
+    - generic [ref=f20e61]:
+      - generic [ref=f20e62]: My journey
+      - button "See full timeline" [ref=f20e63]
+    - complementary
+    - list [ref=f20e67]:
+      - listitem [ref=f20e68]:
+        - generic [aria-hidden] [ref=f20e69]: "01"
+        - generic [ref=f20e70]:
+          - generic [ref=f20e71]:
+            - generic: 2023 to 2024
+            - heading "CESA × Star for Life" [level=3] [ref=f20e72]
+          - generic:
+            - generic:
+              - paragraph [ref=f20e73]: "Core volunteer bringing tech access to South African schools: funding, logistics, and on-site setup."
+              - button "Read more →" [ref=f20e74]
+      - listitem [ref=f20e75]:
+        - generic [aria-hidden] [ref=f20e76]: "02"
+        - generic [ref=f20e77]:
+          - generic [ref=f20e78]:
+            - generic: 2024 to 2025
+            - heading "LexEnergy" [level=3] [ref=f20e79]
+          - generic:
+            - generic:
+              - paragraph [ref=f20e80]: Solo-built the customer-facing frontend for LexEnergy’s EV charger network, the live station interface. React, TypeScript, Figma.
+              - list [ref=f20e81]:
+                - listitem [ref=f20e82]: React
+                - listitem [ref=f20e83]: TypeScript
+                - listitem [ref=f20e84]: Figma
+                - listitem [ref=f20e85]: Frontend
+              - button "Read more →" [ref=f20e86]
+      - listitem [ref=f20e87]:
+        - generic [aria-hidden] [ref=f20e88]: "03"
+        - generic [ref=f20e89]:
+          - generic [ref=f20e90]:
+            - generic: Now
+            - heading "Building my own apps" [level=3] [ref=f20e91]
+          - generic:
+            - generic:
+              - paragraph [ref=f20e92]: Flower Power and Digital Friction in development, launching soon, with more on the way.
+              - list [ref=f20e93]:
+                - listitem [ref=f20e94]: iOS
+              - button "Read more →" [ref=f20e95]
+  - generic [ref=f20e96]:
+    - generic [ref=f20e97]:
+      - generic [ref=f20e98]: a little about me
+      - paragraph [ref=f20e99]: "I’m a multi-passionate person who loves to learn and take on new challenges. My background is in computer science, and I’ve been programming for nine years now. I still love the problem-solving and creativity it gives you: taking something from nothing into something real."
+      - paragraph [ref=f20e100]: "Right now I’m doing my master’s in entrepreneurship and business design, because I want to understand every part of a product: from what makes people buy it to the legal side of building a business."
+      - paragraph [ref=f20e101]: Outside of that, I love snowboarding, sailing and climbing. So if you ever want to have a business meeting doing any of those, that would be the dream.
+    - complementary [ref=f20e102]:
+      - img "Zoé" [ref=f20e104]
+      - generic [ref=f20e108]: Gothenburg · SE
+  - generic [ref=f20e109]:
+    - generic [ref=f20e112]:
+      - generic [ref=f20e113]: Developer · Designer · Frontend · AI · Backend · Strategy · Generalist · Maker · Developer · Designer · Frontend · AI · Backend · Strategy · Generalist · Maker · Developer · Designer · Frontend · AI · Backend · Strategy · Generalist · Maker · Developer · Designer · Frontend · AI · Backend · Strategy · Generalist · Maker ·
+      - generic [ref=f20e114]: Developer · Designer · Frontend · AI · Backend · Strategy · Generalist · Maker · Developer · Designer · Frontend · AI · Backend · Strategy · Generalist · Maker · Developer · Designer · Frontend · AI · Backend · Strategy · Generalist · Maker · Developer · Designer · Frontend · AI · Backend · Strategy · Generalist · Maker ·
+    - generic [ref=f20e118]:
+      - generic [aria-hidden]: Say hi
+      - generic [ref=f20e119]:
+        - generic [ref=f20e120]:
+          - generic [ref=f20e121]: Let’s work together
+          - heading [level=2] [ref=f20e122]:
+            - text: Need a hand with
+            - emphasis [ref=f20e123]: something
+            - text: "?"
+          - paragraph [ref=f20e124]: I do design, code, and the in-between. Drop me a message and we’ll figure out what we can do together.
+          - generic [ref=f20e125]:
+            - link "zoe@zalo.se" [ref=f20e126]:
+              - /url: mailto:zoe@zalo.se
+            - link "LinkedIn" [ref=f20e127]:
+              - /url: https://www.linkedin.com/in/zo%C3%A9-opdendries-007b19132/
+        - generic [ref=f20e128]:
+          - textbox "Name" [ref=f20e129]
+          - textbox "Email" [ref=f20e130]
+          - textbox "What do you have in mind?" [ref=f20e131]
+          - button "Say hi" [ref=f20e132]
+      - generic [ref=f20e133]:
+        - generic [ref=f20e134]: © 2026 Zoé Opdendries
+        - generic [ref=f20e135]: Made in Gothenburg

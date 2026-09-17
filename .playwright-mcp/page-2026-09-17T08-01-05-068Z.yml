@@ -1,0 +1,119 @@
+- main [ref=e3]:
+  - generic [ref=e4]:
+    - generic "Top navigation" [ref=e5]:
+      - link "Zoé Opdendries" [ref=e6]:
+        - /url: "#home"
+      - generic [ref=e10]:
+        - button "Open menu" [ref=e11]
+        - button "Everything I’ve made" [ref=e16]
+    - generic [ref=e19]:
+      - generic [ref=e20]:
+        - heading "I make the things I wish exist" [level=1] [ref=e21]:
+          - generic [ref=e22]: I make the things
+          - generic [ref=e23]: I wish exist
+        - paragraph [ref=e24]: Business strategist, coder & designer in Gothenburg. If something here connects to what you're doing...
+        - link "Just say hi →" [ref=e25]:
+          - /url: "#contact"
+      - link "Scroll to explore" [ref=e26]:
+        - /url: "#building"
+  - generic [ref=e30]:
+    - generic [ref=e31]:
+      - generic [ref=e32]: things i’m making
+      - button "See everything I've made" [ref=e33]: Everything I’ve made
+    - generic [ref=e36]:
+      - button "On the App Store Digital Friction Turns your phone into a dumb phone. App access stays blocked until you finish what you said you'd do. Frictionless is the problem." [ref=e37]:
+        - generic [ref=e40]:
+          - generic [ref=e41]: On the App Store
+          - heading "Digital Friction" [level=3] [ref=e42]
+          - paragraph [ref=e43]: Turns your phone into a dumb phone. App access stays blocked until you finish what you said you'd do. Frictionless is the problem.
+      - article [ref=e44]:
+        - generic [ref=e47]:
+          - generic [ref=e48]: Market validation
+          - heading "Velra" [level=3] [ref=e49]
+          - paragraph [ref=e50]:
+            - text: An energy market venture, done through my entrepreneurship master’s and backed by Chalmers and Lund ventures.
+            - strong [ref=e51]: More information to come.
+      - article [ref=e52]:
+        - generic [ref=e53]:
+          - generic [ref=e54]: Available
+          - heading "Selected projects" [level=3] [ref=e55]
+          - paragraph [ref=e56]: Websites and software, designed and built to spec. I take on a few projects a year alongside Velra. Contact me if you have something.
+    - button "Need something built? Contact me" [ref=e57]
+  - generic [ref=e61]:
+    - generic [ref=e62]:
+      - generic [ref=e63]: My journey
+      - button "See full timeline" [ref=e64]
+    - complementary
+    - list [ref=e68]:
+      - listitem [ref=e69]:
+        - generic [aria-hidden] [ref=e70]: "01"
+        - generic [ref=e71]:
+          - generic [ref=e72]:
+            - generic: 2023 to 2024
+            - heading "CESA × Star for Life" [level=3] [ref=e73]
+          - generic:
+            - generic:
+              - paragraph [ref=e74]: "Core volunteer bringing tech access to South African schools: funding, logistics, and on-site setup."
+              - button "Read more →" [ref=e75]
+      - listitem [ref=e76]:
+        - generic [aria-hidden] [ref=e77]: "02"
+        - generic [ref=e78]:
+          - generic [ref=e79]:
+            - generic: 2024 to 2025
+            - heading "LexEnergy" [level=3] [ref=e80]
+          - generic:
+            - generic:
+              - paragraph [ref=e81]: Solo-built the customer-facing frontend for LexEnergy’s EV charger network, the live station interface. React, TypeScript, Figma.
+              - list [ref=e82]:
+                - listitem [ref=e83]: React
+                - listitem [ref=e84]: TypeScript
+                - listitem [ref=e85]: Figma
+                - listitem [ref=e86]: Frontend
+              - button "Read more →" [ref=e87]
+      - listitem [ref=e88]:
+        - generic [aria-hidden] [ref=e89]: "03"
+        - generic [ref=e90]:
+          - generic [ref=e91]:
+            - generic: Now
+            - heading "Building my own apps" [level=3] [ref=e92]
+          - generic:
+            - generic:
+              - paragraph [ref=e93]: Flower Power and Digital Friction in development, launching soon, with more on the way.
+              - list [ref=e94]:
+                - listitem [ref=e95]: iOS
+  - generic [ref=e96]:
+    - generic [ref=e97]:
+      - generic [ref=e98]: a little about me
+      - paragraph [ref=e99]: "I’m a multi-passionate person who loves to learn and take on new challenges. My background is in computer science, and I’ve been programming for nine years now. I still love the problem-solving and creativity it gives you: taking something from nothing into something real."
+      - paragraph [ref=e100]: "Right now I’m doing my master’s in entrepreneurship and business design, because I want to understand every part of a product: from what makes people buy it to the legal side of building a business."
+      - paragraph [ref=e101]: Outside of that, I love snowboarding, sailing and climbing. So if you ever want to have a business meeting doing any of those, that would be the dream.
+    - complementary [ref=e102]:
+      - img "Zoé" [ref=e104]
+      - generic [ref=e108]: Gothenburg · SE
+  - generic [ref=e109]:
+    - generic [ref=e112]:
+      - generic [ref=e113]: Developer · Designer · Frontend · AI · Backend · Strategy · Generalist · Maker · Developer · Designer · Frontend · AI · Backend · Strategy · Generalist · Maker · Developer · Designer · Frontend · AI · Backend · Strategy · Generalist · Maker · Developer · Designer · Frontend · AI · Backend · Strategy · Generalist · Maker ·
+      - generic [ref=e114]: Developer · Designer · Frontend · AI · Backend · Strategy · Generalist · Maker · Developer · Designer · Frontend · AI · Backend · Strategy · Generalist · Maker · Developer · Designer · Frontend · AI · Backend · Strategy · Generalist · Maker · Developer · Designer · Frontend · AI · Backend · Strategy · Generalist · Maker ·
+    - generic [ref=e118]:
+      - generic [aria-hidden]: Say hi
+      - generic [ref=e119]:
+        - generic [ref=e120]:
+          - generic [ref=e121]: Let’s work together
+          - heading [level=2] [ref=e122]:
+            - text: Need a hand with
+            - emphasis [ref=e123]: something
+            - text: "?"
+          - paragraph [ref=e124]: I do design, code, and the in-between. Drop me a message and we’ll figure out what we can do together.
+          - generic [ref=e125]:
+            - link "zoe@zalo.se" [ref=e126]:
+              - /url: mailto:zoe@zalo.se
+            - link "LinkedIn" [ref=e127]:
+              - /url: https://www.linkedin.com/in/zo%C3%A9-opdendries-007b19132/
+        - generic [ref=e128]:
+          - textbox "Name" [ref=e129]
+          - textbox "Email" [ref=e130]
+          - textbox "What do you have in mind?" [ref=e131]
+          - button "Say hi" [ref=e132]
+      - generic [ref=e133]:
+        - generic [ref=e134]: © 2026 Zoé Opdendries
+        - generic [ref=e135]: Made in Gothenburg

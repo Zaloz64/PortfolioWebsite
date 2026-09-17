@@ -3,14 +3,56 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta
+      name="description"
+      content="Zoé Opdendries, developer & designer in Gothenburg. I design, code, and the in-between. Got something you want built?"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://zaloz64.github.io/PortfolioWebsite/" />
+    <meta property="og:title" content="Zoé Opdendries, Developer & Designer" />
+    <meta
+      property="og:description"
+      content="Developer & designer in Gothenburg. I design, code, and the in-between. Got something you want built?"
+    />
+    <!-- TODO: add a 1200×630 og-image.png to /public and uncomment for link previews.
+    <meta property="og:image" content="https://zaloz64.github.io/PortfolioWebsite/og-image.png" /> -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Zoé Opdendries, Developer & Designer" />
+    <meta
+      name="twitter:description"
+      content="Developer & designer in Gothenburg. I design, code, and the in-between. Got something you want built?"
+    />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap"
       rel="stylesheet"
     />
-    <title>Zoé — Portfolio</title>
+    <title>Zoé · Portfolio</title>
+    <!-- Restore the real path after the 404.html SPA fallback redirect, before
+         the app boots (rafgraph/spa-github-pages technique). -->
+    <script>
+      ;(function (l) {
+        if (l.search[1] === '/') {
+          var decoded = l.search
+            .slice(1)
+            .split('&')
+            .map(function (s) {
+              return s.replace(/~and~/g, '&')
+            })
+            .join('?')
+          window.history.replaceState(
+            null,
+            null,
+            l.pathname.slice(0, -1) + decoded + l.hash,
+          )
+        }
+      })(window.location)
+    </script>
   </head>
   <body>
     <div id="root"></div>

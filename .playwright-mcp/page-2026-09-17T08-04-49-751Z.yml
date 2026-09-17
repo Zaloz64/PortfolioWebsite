@@ -1,0 +1,103 @@
+- main [ref=f1e3]:
+  - generic "Top navigation" [ref=f1e5]:
+    - link "Zoé Opdendries" [ref=f1e6]:
+      - /url: "#home"
+    - generic [ref=f1e10]:
+      - button "Open menu" [ref=f1e11]
+      - button "Everything I’ve made" [ref=f1e16]
+  - generic [ref=f1e21]:
+    - button "Back to home" [ref=f1e22]
+    - heading "the archives" [level=1] [ref=f1e25]
+  - group "Filter work by type" [ref=f1e26]:
+    - generic [ref=f1e27]:
+      - button "Filter All" [ref=f1e28]:
+        - generic [ref=f1e31]: Filter
+        - generic [ref=f1e32]: All
+      - generic [ref=f1e33]: 7 projects
+  - generic [ref=f1e36]:
+    - article [ref=f1e37]:
+      - generic [ref=f1e38]:
+        - paragraph [ref=f1e39]: Hi :) Happy you are intressted in my work!
+        - paragraph [ref=f1e40]:
+          - text: Here you have a
+          - mark [ref=f1e41]: running catalogue
+          - text: of what I have
+          - mark [ref=f1e42]: designd and buildt
+          - text: ", form products, client/job work, and some experiences i have hade in between. Not everything I have made is here yet, more to come."
+      - paragraph [ref=f1e43]: Open any tile to find the full story behind it.
+    - button "Velra, more information to come" [ref=f1e44]:
+      - generic [ref=f1e45]:
+        - generic [ref=f1e46]: Now
+        - generic [aria-hidden] [ref=f1e47]: N°01
+      - generic [ref=f1e48]:
+        - heading "Velra" [level=3] [ref=f1e49]
+        - paragraph [ref=f1e50]:
+          - text: An energy market venture, done through my entrepreneurship master’s and backed by Chalmers and Lund ventures.
+          - strong [ref=f1e51]: More information to come.
+        - generic [ref=f1e52]: Business developer
+        - list [aria-hidden] [ref=f1e53]:
+          - listitem [ref=f1e54]: Business
+    - button "Digital Friction, Apps, Design, Code & AI, read more" [ref=f1e55]:
+      - generic [ref=f1e56]:
+        - generic [ref=f1e57]: "2025"
+        - generic [aria-hidden] [ref=f1e58]: N°02
+      - generic [ref=f1e59]:
+        - heading "Digital Friction" [level=3] [ref=f1e60]
+        - paragraph [ref=f1e61]: Turns your phone into a dumb phone. App access stays blocked until you finish what you said you would do.
+        - generic [ref=f1e62]: Designed and built solo · on the App Store
+        - list [aria-hidden] [ref=f1e63]:
+          - listitem [ref=f1e64]: Apps
+          - listitem [ref=f1e65]: Design
+          - listitem [ref=f1e66]: Code & AI
+    - button "Flower Power, Apps, Design, Code & AI, read more" [ref=f1e67]:
+      - generic [aria-hidden] [ref=f1e71]: N°03
+      - generic [ref=f1e72]:
+        - generic [ref=f1e73]: Soon
+        - heading "Flower Power" [level=3] [ref=f1e74]
+        - paragraph [ref=f1e75]: A simple plant care app I built because I kept forgetting to water my own plants.
+        - generic [ref=f1e76]: Designed and built solo · core features free
+        - list [aria-hidden] [ref=f1e77]:
+          - listitem [ref=f1e78]: Apps
+          - listitem [ref=f1e79]: Design
+          - listitem [ref=f1e80]: Code & AI
+    - button "LexEnergy, Code & AI, Design, read more" [ref=f1e81]:
+      - generic [ref=f1e82]:
+        - generic [ref=f1e83]: 2024 to 2025
+        - generic [aria-hidden] [ref=f1e84]: N°04
+      - generic [ref=f1e85]:
+        - heading "LexEnergy" [level=3] [ref=f1e86]
+        - paragraph [ref=f1e87]: Frontend for a battery-backed EV charging network that helps chargers work in places where normal grid capacity can be limited.
+        - generic [ref=f1e88]: Sole frontend owner · React, Vite and TypeScript
+        - list [aria-hidden] [ref=f1e89]:
+          - listitem [ref=f1e90]: Code & AI
+          - listitem [ref=f1e91]: Design
+    - button "AI dental diagnosis, Code & AI, read more" [ref=f1e92]:
+      - generic [ref=f1e93]:
+        - generic [ref=f1e94]: "2024"
+        - generic [aria-hidden] [ref=f1e95]: N°05
+      - generic [ref=f1e96]:
+        - heading "AI dental diagnosis" [level=3] [ref=f1e97]
+        - paragraph [ref=f1e98]: "Bachelor thesis: an AI system diagnosing misaligned teeth from clinical imagery."
+        - generic [ref=f1e99]: Bachelor thesis · Chalmers
+        - list [aria-hidden] [ref=f1e100]:
+          - listitem [ref=f1e101]: Code & AI
+    - button "Bridging the Digital Education Gap, Impact, Business, read more" [ref=f1e102]:
+      - generic [ref=f1e103]:
+        - generic [ref=f1e104]: 2023 to 2024
+        - generic [aria-hidden] [ref=f1e105]: N°06
+      - generic [ref=f1e106]:
+        - heading "Bridging the Digital Education Gap" [level=3] [ref=f1e107]
+        - paragraph [ref=f1e108]: Vice Chairman of a Chalmers initiative bringing computers and offline learning tools to schools in KwaZulu-Natal, South Africa.
+        - generic [ref=f1e109]: Funded, planned and set up on site
+        - list [aria-hidden] [ref=f1e110]:
+          - listitem [ref=f1e111]: Impact
+          - listitem [ref=f1e112]: Business
+    - button "EGOI, Code & AI, read more" [ref=f1e113]:
+      - generic [ref=f1e114]:
+        - generic [ref=f1e115]: "2021"
+        - generic [aria-hidden] [ref=f1e116]: N°07
+      - generic [ref=f1e117]:
+        - heading "EGOI" [level=3] [ref=f1e118]
+        - paragraph [ref=f1e119]: Qualified nationally for the European Girls’ Olympiad in Informatics.
+        - list [aria-hidden] [ref=f1e120]:
+          - listitem [ref=f1e121]: Code & AI
